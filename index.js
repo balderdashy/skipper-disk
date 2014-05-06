@@ -10,18 +10,18 @@ var _ = require('lodash');
 
 
 /**
- * Example of a simple receiver for file-parser.
- * This is used for handling file uploads and writing them
- * to a storage container.
- *
- * This is just a super-basic thing that writes files to disk.
- * It does include a garbage-collection mechanism for file uploads
- * which were not successful.
+ * skipper-disk
+ * 
+ * A simple receiver for Skipper that writes Upstreams to
+ * disk at the configured path.
+ * 
+ * Includes a garbage-collection mechanism for failed
+ * uploads.
  *
  * @return {Stream.Writable}
  */
 
-module.exports = function newReceiverStream(options) {
+module.exports = function DiskReceiver (options) {
   options = options || {};
   _.defaults(options, {
 
@@ -62,11 +62,13 @@ module.exports = function newReceiverStream(options) {
 
     // Ensure necessary parent directories exist:
     fsx.mkdirs(dirPath, function (err) {
-      if (err) { /* ignore mkdir error */ }
+      if (err) {
+        // TODO: ignore "already exists" error
+        
+      }
       
       var outs = fsx.createWriteStream(filePath, encoding);
       __newFile.pipe(outs);
-
 
 
       __newFile.on('error', function(err) {
