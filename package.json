@@ -1,0 +1,30 @@
+{
+  "name": "skipper-disk",
+  "version": "0.0.0",
+  "description": "Receive Skipper's file uploads on your local filesystem",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/balderdashy/skipper-disk.git"
+  },
+  "keywords": [
+    "skipper",
+    "filesystem",
+    "file",
+    "upload",
+    "upload",
+    "disk",
+    "drive",
+    "sails",
+    "express"
+  ],
+  "author": "Mike McNeil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/balderdashy/skipper-disk/issues"
+  },
+  "homepage": "https://github.com/balderdashy/skipper-disk"
+}
