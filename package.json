@@ -29,5 +29,9 @@
   "homepage": "https://github.com/balderdashy/skipper-disk",
   "devDependencies": {
     "mocha": "~1.18.2"
+  },
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "fs-extra": "~0.8.1"
   }
 }
