@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/balderdashy/skipper-disk",
   "devDependencies": {
-    "skipper-adapter-tests": "~1.0.0"
+    "skipper-adapter-tests": "~1.1.2"
   },
   "dependencies": {
     "lodash": "~2.4.1",
