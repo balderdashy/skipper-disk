@@ -1,6 +1,6 @@
 {
   "name": "skipper-disk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Receive Skipper's file uploads on your local filesystem",
   "main": "index.js",
   "scripts": {
