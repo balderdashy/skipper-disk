@@ -1,8 +1,8 @@
-# [<img title="skipper-disk - Local disk adapter for Skipper" src="http://i.imgur.com/P6gptnI.png" width="75px" alt="skipper emblem - face of a ship's captain"/>](https://github.com/balderdashy/skipper-disk) skipper-disk
+# [<img title="skipper-disk - Local disk adapter for Skipper" src="http://i.imgur.com/P6gptnI.png" width="125px" alt="skipper emblem - face of a ship's captain"/>](https://github.com/balderdashy/skipper-disk) Disk Adapter
 
-[![Bower version](https://badge.fury.io/bo/sails.io.js.png)](http://badge.fury.io/bo/sails.io.js)
-[![NPM version](https://badge.fury.io/js/sails.io.js.png)](http://badge.fury.io/js/sails.io.js) &nbsp; &nbsp;
-[![Build Status](https://travis-ci.org/balderdashy/sails.io.js.svg?branch=master)](https://travis-ci.org/balderdashy/sails.io.js)
+[![Bower version](https://badge.fury.io/bo/skipper-disk.png)](http://badge.fury.io/bo/skipper-disk)
+[![NPM version](https://badge.fury.io/js/skipper-disk.png)](http://badge.fury.io/js/skipper-disk) &nbsp; &nbsp;
+[![Build Status](https://travis-ci.org/balderdashy/skipper-disk.svg?branch=master)](https://travis-ci.org/balderdashy/skipper-disk)
 
 Local filesystem adapter for streaming multipart uploads via Skipper.
 
