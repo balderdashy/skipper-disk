@@ -12,16 +12,38 @@ var _ = require('lodash');
 /**
  * skipper-disk
  *
+ * @param  {Object} options
+ * @return {Object}
+ */
+
+module.exports = function DiskStore (options) {
+  options = options || {};
+
+  return {
+
+    touch: function (){throw new Error('todo');},
+    rm: function (){throw new Error('todo');},
+    ls: function (){throw new Error('todo');},
+    write: function (){throw new Error('todo');},
+    read: function (){throw new Error('todo');},
+
+    receiver: DiskReceiver
+  };
+};
+
+
+
+/**
  * A simple receiver for Skipper that writes Upstreams to
  * disk at the configured path.
  *
  * Includes a garbage-collection mechanism for failed
  * uploads.
  *
+ * @param  {Object} options
  * @return {Stream.Writable}
  */
-
-module.exports = function DiskReceiver (options) {
+function DiskReceiver (options) {
   options = options || {};
   _.defaults(options, {
 
@@ -45,10 +67,23 @@ module.exports = function DiskReceiver (options) {
   // into this receiver.  (filename === `__newFile.filename`).
   receiver__._write = function onFile(__newFile, encoding, done) {
 
-    // Determine location where file should be written
-    var dirPath = path.resolve(options.dirname);
-    var filename = options.getFilename(__newFile);
-    var filePath = path.join(dirPath, filename);
+    // Determine location where file should be written:
+    // -------------------------------------------------------
+    var filePath, dirPath, filename;
+    if (options.id) {
+      // If `options.id` was specified, use it directly as the path.
+      filePath = options.id;
+      dirPath = path.dirname(filePath);
+      filename = path.basename(filePath);
+    }
+    else {
+      // Otherwise, use the more sophisiticated options:
+      dirPath = path.resolve(options.dirname);
+      filename = options.getFilename(__newFile);
+      filePath = path.join(dirPath, filename);
+    }
+    // -------------------------------------------------------
+
 
     // Garbage-collect the bytes that were already written for this file.
     // (called when a read or write error occurs)
@@ -87,4 +122,5 @@ module.exports = function DiskReceiver (options) {
   };
 
   return receiver__;
-};
+
+}
