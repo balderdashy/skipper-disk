@@ -28,7 +28,6 @@
   },
   "homepage": "https://github.com/balderdashy/skipper-disk",
   "devDependencies": {
-    "mocha": "~1.18.2",
     "skipper-adapter-tests": "~1.0.0"
   },
   "dependencies": {
