@@ -11,10 +11,10 @@ var _ = require('lodash');
 
 /**
  * skipper-disk
- * 
+ *
  * A simple receiver for Skipper that writes Upstreams to
  * disk at the configured path.
- * 
+ *
  * Includes a garbage-collection mechanism for failed
  * uploads.
  *
@@ -64,9 +64,9 @@ module.exports = function DiskReceiver (options) {
     fsx.mkdirs(dirPath, function (err) {
       if (err) {
         // TODO: ignore "already exists" error
-        
+
       }
-      
+
       var outs = fsx.createWriteStream(filePath, encoding);
       __newFile.pipe(outs);
 
