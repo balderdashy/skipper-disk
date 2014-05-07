@@ -7,6 +7,30 @@
 Local filesystem adapter for streaming multipart uploads via Skipper.
 
 
+## Usage
+
+```
+$ npm install skipper-disk --save
+```
+
+```js
+// ...
+var adapter = require('skipper-disk')({ /* default opts */ });
+var receiver = adapter.receiver({
+  /* per-request opts */
+  id: 'foo.jpg'
+});
+
+req.file('foo').upload(receiver, function (err, filesUploaded) {
+  // ...
+});
+
+// :or alternatively:
+// req.file('foo').pipe(receiver);
+
+// ...
+```
+
 ========================================
 
 ## Contribute
