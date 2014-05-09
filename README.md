@@ -5,6 +5,7 @@
 
 Local filesystem adapter for streaming multipart uploads via Skipper.
 
+========================================
 
 ## Installation
 
@@ -12,6 +13,7 @@ Local filesystem adapter for streaming multipart uploads via Skipper.
 $ npm install skipper-disk --save
 ```
 
+========================================
 
 ## Usage
 
@@ -30,7 +32,7 @@ req.file('foo').upload(receiving), function (err, filesUploaded) {
 });
 ```
 
-
+========================================
 
 ## Options
 
@@ -88,11 +90,6 @@ req.file('foo').pipe(receiving);
 See `CONTRIBUTING.md`.
 
 
-========================================
-
-### Version
-
-This repository holds the socket client SDK for Sails versions 0.10.0 and up.  If you're looking for the SDK for the v0.9.x releases of Sails, the source is [located here](https://github.com/balderdashy/sails/blob/v0.9.16/bin/boilerplates/assets/js/sails.io.js).
 
 ========================================
 
