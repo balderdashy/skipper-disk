@@ -17,14 +17,19 @@ $ npm install skipper-disk --save
 
 ## Usage
 
-To upload files, configure a blob adapter and build a receiver (`receiving`):
+First instantiate a blob adapter (`blobAdapter`):
 
 ```js
 var blobAdapter = require('skipper-disk')();
+```
+
+Build a receiver (`receiving`):
+
+```js
 var receiving = blobAdapter.receive();
 ```
 
-Then upload file(s) from a particular field into it:
+Then stream file(s) from a particular field (`req.file('foo')`):
 
 ```js
 req.file('foo').upload(receiving), function (err, filesUploaded) {
@@ -71,17 +76,14 @@ As an alternative to the `upload()` method, you can pipe an incoming **upstream*
 req.file('foo').pipe(receiving);
 ```
 
-> **Note:**
->
-> There is no performance benefit to using `.pipe()` instead of `.upload()`-- they both use streams2.  The `.pipe()` method is available merely as a matter of flexibility/chainability.  Be aware that `.upload()` handles the `error` and `finish` events for you; if you choose to use `.pipe()`, you will of course need to listen for these events manually:
->
-> ```js
-> req.file('foo')
-> .on('error', function onError() { ... })
-> .on('finish', function onSuccess() { ... })
-> .pipe(receiving)
-> ```
->
+There is no performance benefit to using `.pipe()` instead of `.upload()`-- they both use streams2.  The `.pipe()` method is available merely as a matter of flexibility/chainability.  Be aware that `.upload()` handles the `error` and `finish` events for you; if you choose to use `.pipe()`, you will of course need to listen for these events manually:
+
+```js
+req.file('foo')
+.on('error', function onError() { ... })
+.on('finish', function onSuccess() { ... })
+.pipe(receiving)
+```
 
 ========================================
 
@@ -96,7 +98,7 @@ See `CONTRIBUTING.md`.
 ### License
 
 **[MIT](./LICENSE)**
-&copy; 2014
+&copy; 2013, 2014-
 [Mike McNeil](http://michaelmcneil.com), [Balderdash](http://balderdash.co) & contributors
 
 See `LICENSE.md`.
