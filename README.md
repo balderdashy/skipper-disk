@@ -18,8 +18,8 @@ $ npm install skipper-disk --save
 To upload files, build and configure a receiver (`outs`):
 
 ```js
-var UploadAdapter = require('skipper-disk')({/* generalOpts */});
-var receiving = ServerFilesystem.receiver({ /* perRequestOpts */ });
+var BlobAdapter = require('skipper-disk')({/* generalOpts */});
+var receiving = BlobAdapter.receiver({ /* perRequestOpts */ });
 ```
 
 Then upload file(s) from a particular field into it:
@@ -45,7 +45,7 @@ var BlobAdapter = require('skipper-disk')({
 Or directly into the receiver:
 
 ```js
-var receiving = ServerFilesystem.receiver({
+var receiving = BlobAdapter.receiver({
   /* perRequestOpts */
 });
 ```
