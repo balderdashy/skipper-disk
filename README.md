@@ -34,7 +34,7 @@ var receiving = blobAdapter.receive();
 Then stream file(s) from a particular field (`req.file('foo')`):
 
 ```js
-req.file('foo').upload(receiving), function (err, filesUploaded) {
+req.file('foo').upload(receiving, function (err, filesUploaded) {
   // ...
 });
 ```
