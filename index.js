@@ -46,17 +46,18 @@ module.exports = function DiskStore (options) {
 function DiskReceiver (options) {
   options = options || {};
 
-  // Normalize `rename()` option:
-  // options.rename() <==> options.getFilename() <==> options.getFileName()
-  options.rename = options.rename || options.getFileName;
-  options.rename = options.rename || options.getFilename;
+  // Normalize `saveAs()` option:
+  // options.saveAs() <==> options.rename() <==> options.getFilename() <==> options.getFileName()
+  options.saveAs = options.saveAs || options.rename;
+  options.saveAs = options.saveAs || options.getFileName;
+  options.saveAs = options.saveAs || options.getFilename;
 
   _.defaults(options, {
 
     // By default, create new files on disk
     // using their uploaded filenames.
     // (no overwrite-checking is performed!!)
-    rename: function (__newFile) {
+    saveAs: function (__newFile) {
       return __newFile.filename;
     },
 
@@ -85,7 +86,7 @@ function DiskReceiver (options) {
     else {
       // Otherwise, use the more sophisiticated options:
       dirPath = path.resolve(options.dirname);
-      filename = options.rename(__newFile);
+      filename = options.saveAs(__newFile);
       filePath = path.join(dirPath, filename);
     }
     // -------------------------------------------------------
