@@ -3,7 +3,7 @@
 [![NPM version](https://badge.fury.io/js/skipper-disk.png)](http://badge.fury.io/js/skipper-disk) &nbsp; &nbsp;
 [![Build Status](https://travis-ci.org/balderdashy/skipper-disk.svg?branch=master)](https://travis-ci.org/balderdashy/skipper-disk)
 
-Local filesystem adapter for streaming multipart uploads via Skipper.
+Local filesystem adapter for receiving streams of file streams.  Partcularly useful for streaming multipart file uploads via Skipper.
 
 ========================================
 
