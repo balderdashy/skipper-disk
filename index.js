@@ -26,7 +26,8 @@ module.exports = function DiskStore (options) {
     ls: function (){throw new Error('todo');},
     write: function (){throw new Error('todo');},
 
-    receiver: DiskReceiver
+    receiver: DiskReceiver,
+    receive: DiskReceiver
   };
 };
 

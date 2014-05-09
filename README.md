@@ -15,11 +15,11 @@ $ npm install skipper-disk --save
 
 ## Usage
 
-To upload files, build and configure a receiver (`outs`):
+To upload files, configure a blob adapter and build a receiver (`receiving`):
 
 ```js
-var BlobAdapter = require('skipper-disk')({/* generalOpts */});
-var receiving = BlobAdapter.receiver({ /* perRequestOpts */ });
+var BlobAdapter = require('skipper-disk')();
+var receiving = BlobAdapter.receive();
 ```
 
 Then upload file(s) from a particular field into it:
@@ -45,29 +45,16 @@ var BlobAdapter = require('skipper-disk')({
 Or directly into the receiver:
 
 ```js
-var receiving = BlobAdapter.receiver({
+var receiving = BlobAdapter.receive({
   /* perRequestOpts */
 });
-```
-
-
-For example:
-
-```js
-// ...
-var adapter = require('skipper-disk')({ /* default opts */ });
-var receiver = adapter.receiver({
-  /* per-request opts */
-  id: 'foo.jpg'
-});
-
 ```
 
 
 | Option    | Type       | Details |
 |-----------|:----------:|---------|
 | `dirname`  | ((string)) | The path to the directory on disk where file uploads should be streamed.  May be specified as an absolute path (e.g. `/Users/mikermcneil/foo`) or a relative path from the current working directory.  Defaults to `".tmp/uploads/"`
-| `rename()`  | ((function)) | An optional function that can be used to define the logic for naming files.  By default, the filename of the uploaded file is used. |
+| `rename()`  | ((function)) | An optional function that can be used to define the logic for naming files.  By default, the filename of the uploaded file is used. <br/> For example: <br/> `function onSuccess() {})|
 
 
 ========================================
