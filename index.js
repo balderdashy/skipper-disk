@@ -32,7 +32,12 @@ module.exports = function DiskStore (options) {
       return fsx.readdir(dirpath, cb);
     },
     read: function (filepath, cb) {
-      return fsx.readFile(filepath, cb);
+      if (cb) {
+        return fsx.readFile(filepath, cb);
+      }
+      else {
+        return fsx.createReadStream(filepath);
+      }
     },
 
     receive: DiskReceiver,
