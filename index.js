@@ -25,7 +25,6 @@ module.exports = function DiskStore (options) {
     rm: function (){throw new Error('todo');},
     ls: function (){throw new Error('todo');},
     write: function (){throw new Error('todo');},
-    read: function (){throw new Error('todo');},
 
     receiver: DiskReceiver
   };
@@ -96,33 +95,35 @@ function DiskReceiver (options) {
     function gc(err) {
       // console.log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
       fsx.unlink(filePath, function(gcErr) {
-        if (gcErr) return done([err].concat([gcErr]));
+        // Ignore "doesn't exist" errors
+        if (gcErr) {
+          if (gcErr.code !== 'ENOENT') return done([err].concat([gcErr]));
+        }
         return done(err);
       });
     }
 
     // Ensure necessary parent directories exist:
-    fsx.mkdirs(dirPath, function (err) {
-      if (err) {
-        // TODO: ignore "already exists" error
-
+    fsx.mkdirs(dirPath, function (mkdirsErr) {
+      // If we get an error here, it's probably because the Node
+      // user doesn't have write permissions at the designated
+      // path.
+      if (mkdirsErr) {
+        return done(mkdirsErr);
       }
 
       var outs = fsx.createWriteStream(filePath, encoding);
-      __newFile.pipe(outs);
-
-
-      __newFile.on('error', function(err) {
+      __newFile.on('error', function (err) {
         // console.log('***** READ error on file ' + __newFile.filename, '::', err);
       });
       outs.on('error', function failedToWriteFile(err) {
         // console.log('Error on output stream- garbage collecting unfinished uploads...');
         gc(err);
       });
-
       outs.on('finish', function successfullyWroteFile() {
         done();
       });
+      __newFile.pipe(outs);
     });
 
   };
