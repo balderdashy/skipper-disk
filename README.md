@@ -18,8 +18,8 @@ $ npm install skipper-disk --save
 To upload files, configure a blob adapter and build a receiver (`receiving`):
 
 ```js
-var BlobAdapter = require('skipper-disk')();
-var receiving = BlobAdapter.receive();
+var blobAdapter = require('skipper-disk')();
+var receiving = blobAdapter.receive();
 ```
 
 Then upload file(s) from a particular field into it:
@@ -34,19 +34,19 @@ req.file('foo').upload(receiving), function (err, filesUploaded) {
 
 ## Options
 
-All options may be passed either into the `skipper-disk` factory method:
+All options may be passed either into the blob adapter's factory method:
 
 ```js
-var BlobAdapter = require('skipper-disk')({
-  /* generalOpts */
+var blobAdapter = require('skipper-disk')({
+  // These options will be applied unless overridden.
 });
 ```
 
-Or directly into the receiver:
+Or directly into a receiver:
 
 ```js
-var receiving = BlobAdapter.receive({
-  /* perRequestOpts */
+var receiving = blobAdapter.receive({
+  // Options will be applied only to this particular receiver.
 });
 ```
 
@@ -54,16 +54,16 @@ var receiving = BlobAdapter.receive({
 | Option    | Type       | Details |
 |-----------|:----------:|---------|
 | `dirname`  | ((string)) | The path to the directory on disk where file uploads should be streamed.  May be specified as an absolute path (e.g. `/Users/mikermcneil/foo`) or a relative path from the current working directory.  Defaults to `".tmp/uploads/"`
-| `rename()`  | ((function)) | An optional function that can be used to define the logic for naming files.  By default, the filename of the uploaded file is used. <br/> For example: <br/> `function onSuccess() {})|
+| `rename()`  | ((function)) | An optional function that can be used to define the logic for naming files. For example: <br/> `function (file) {return Math.random()+file.name;} });` <br/> By default, the filename of the uploaded file is used, including the extension (e.g. `"Screen Shot 2014-05-06 at 4.44.02 PM.jpg"`.  If a file already exists at `dirname` with the same name, it will be overridden. |
 
 
 ========================================
 
 ## Advanced Usage
 
-#### `upstream.pipe(receiving)`
+#### `.pipe(receiving)`
 
-As an alternative to the `upload()` method, you can pipe the incoming **Upstream** returned from `req.file()` (a Readable stream of Readable binary streams) directly to the receiver (a Writable stream designed to support a Readable stream of Readable binary streams.)
+As an alternative to the `upload()` method, you can pipe an incoming **Upstream** returned from `req.file()` (a Readable stream of Readable binary streams) directly to the receiver (a Writable stream designed to support a Readable stream of Readable binary streams.)
 
 ```js
 req.file('foo').pipe(receiving);
@@ -71,7 +71,7 @@ req.file('foo').pipe(receiving);
 
 > **Note:**
 >
-> There is no performance benefit to using `.pipe()` instead of `.upload()`-- they both use streams2.  The `.pipe()` method is available as a matter of flexibility/chainability. If you do choose to use it, be sure to listen for error events:
+> There is no performance benefit to using `.pipe()` instead of `.upload()`-- they both use streams2.  The `.pipe()` method is available merely as a matter of flexibility/chainability.  Be aware that `.upload()` handles the `error` and `finish` events for you; if you choose to use `.pipe()`, you will of course need to listen for these events manually:
 >
 > ```js
 > req.file('foo')
