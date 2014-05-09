@@ -99,6 +99,7 @@ See `CONTRIBUTING.md`.
 
 **[MIT](./LICENSE)**
 &copy; 2013, 2014-
+
 [Mike McNeil](http://michaelmcneil.com), [Balderdash](http://balderdash.co) & contributors
 
 See `LICENSE.md`.
