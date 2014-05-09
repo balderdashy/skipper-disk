@@ -100,7 +100,7 @@ module.exports = function DiskStore (options) {
       else {
         // Otherwise, use the more sophisiticated options:
         dirPath = path.resolve(options.dirname);
-        filename = options.saveAs(__newFile);
+        filename = options.filename || options.saveAs(__newFile);
         filePath = path.join(dirPath, filename);
       }
       // -------------------------------------------------------
