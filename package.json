@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "lodash": "~2.4.1",
-    "fs-extra": "~0.8.1"
+    "fs-extra": "~0.8.1",
+    "progress-stream": "git://github.com/mikermcneil/progress-stream.git#patch-1"
   }
 }
