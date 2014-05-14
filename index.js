@@ -137,11 +137,12 @@ module.exports = function DiskStore (options) {
     // into this receiver.  (filename === `__newFile.filename`).
     receiver__._write = function onFile(__newFile, encoding, done) {
 
-      var _done = done;
-      done = function () {
-        console.log('CALLED DONE ON RECEIVER WITH ARGS:',Array.prototype.slice.call(arguments));
-        _done.apply(null, Array.prototype.slice.call(arguments));
-      };
+
+      // var _done = done;
+      // done = function () {
+      //   console.log('CALLED DONE ON RECEIVER WITH ARGS:',Array.prototype.slice.call(arguments));
+      //   _done.apply(null, Array.prototype.slice.call(arguments));
+      // };
 
       console.log('new file received:', __newFile.filename);
 
@@ -170,7 +171,7 @@ module.exports = function DiskStore (options) {
         // console.log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
         adapter.rm(filePath, function (gcErr) {
           if (gcErr) return done([err].concat([gcErr]));
-          else return done();
+          else return done(err);
         });
       }
 
@@ -195,7 +196,7 @@ module.exports = function DiskStore (options) {
         var outs__ = fsx.createWriteStream(filePath, encoding);
         outs__.on('error', function failedToWriteFile(err) {
           // if ( !abort() ) return;
-          console.log('Error on output stream- garbage collecting unfinished uploads...');
+          console.log('Error on output stream- garbage collecting unfinished uploads...', err);
           gc(err);
         });
         outs__.on('finish', function successfullyWroteFile() {
@@ -207,7 +208,28 @@ module.exports = function DiskStore (options) {
 
         // Generate a progress stream and unique id for this file
         var localID = _.uniqueId();
-        var __progress__ = ProgressStream({});
+        // var __progress__ = ProgressStream({});
+        var guessedTotal = 0;
+        var writtenSoFar = 0;
+        var __progress__ = new require('stream').Transform();
+        __progress__._transform = function (chunk,enctype,next) {
+
+          // Update the guessedTotal to make % estimate
+          // more accurate:
+          guessedTotal += chunk.length;
+          writtenSoFar += chunk.length;
+
+          this.push(chunk);
+          this.emit('progress', {
+            id: localID,
+            name: __newFile.name,
+            written: writtenSoFar,
+            total: guessedTotal,
+            percent: (writtenSoFar/guessedTotal)*100 | 0
+          });
+          next();
+        };
+
         // This event is fired when a single file stream emits a progress event.
         // Each time we receive a file, we must recalculate the TOTAL progress
         // for the aggregate file upload.
@@ -228,18 +250,18 @@ module.exports = function DiskStore (options) {
 
         // Used to calculate total size of this file (used for estimated %, etc.)
         // var total = (__newFile._readableState && __newFile._readableState.length) || milestone.length;
-        var guessedTotal = 0;
-        var __countBytes__ = require('stream').Transform();
-        __countBytes__._transform = function (chunk, enctype, next) {
-          guessedTotal += chunk.length;
+        // var guessedTotal = 0;
+        // var __countBytes__ = require('stream').Transform();
+        // __countBytes__._transform = function (chunk, enctype, next) {
+        //   guessedTotal += chunk.length;
 
-          // Update the length on the progress stream to make % estimate
-          // more accurate:
-          __progress__.setLength(guessedTotal);
+        //   // Update the length on the progress stream to make % estimate
+        //   // more accurate:
+        //   __progress__.setLength(guessedTotal);
 
-          this.push(chunk);
-          next();
-        };
+        //   this.push(chunk);
+        //   next();
+        // };
 
         __progress__.on('progress', function singleFileProgress (milestone) {
 
@@ -248,18 +270,18 @@ module.exports = function DiskStore (options) {
             id: localID
           });
           if (currentFileProgress) {
-            currentFileProgress.written = milestone.transferred;
-            currentFileProgress.total = milestone.length;
-            currentFileProgress.percent = milestone.percentage;
+            currentFileProgress.written = milestone.written;
+            currentFileProgress.total = milestone.total;
+            currentFileProgress.percent = milestone.percent;
             currentFileProgress.stream = __newFile;
           }
           else {
             currentFileProgress = {
               id          : localID,
               name        : __newFile.filename,
-              written     : milestone.transferred,
-              total       : milestone.length,
-              percent     : milestone.percentage,
+              written     : milestone.written,
+              total       : milestone.total,
+              percent     : milestone.percent,
               stream      : __newFile
             };
             receiver__._files.push(currentFileProgress);
@@ -286,13 +308,80 @@ module.exports = function DiskStore (options) {
           if (options.maxBytes && totalBytesWritten >= options.maxBytes) {
             // if ( !abort() ) return;
             // __progress__.removeAllListeners('progress');
+
+            // TODO:Pipe the remainder of this file to /dev/null
+            // _.each(receiver__._files, function (file) {
+            //   console.log('piping file ('+file.name+') down the leaky drain');
+            //   var leaky = new Writable();
+            //   leaky._write = function (chunk,encoding, cb) { console.log(chunk.length,'bytes down the drain, whee!!!'); cb(); };
+            //   file.stream.unpipe();
+            //   file.stream.pipe( leaky );
+            // });
+
+
             var err = new Error();
             err.code = 'E_EXCEEDS_UPLOAD_LIMIT';
             err.name = 'Upload Error';
             err.maxBytes = options.maxBytes;
             err.written = totalBytesWritten;
             err.message = 'Upload limit of '+err.maxBytes+' bytes exceeded ('+err.written+' bytes written)';
-            return done(err);
+            // __newFile.emit('error', err);
+            console.log('unpiping all the things...');
+
+            // __progress__.unpipe();
+            // var memoryhole0 = new Writable();
+            // memoryhole0._write = function (chunk,encoding, cb) {
+            //   console.log(__newFile.filename, chunk.length,'bytes down the drain to the memory hole (draining __progress__)');
+            //   cb();
+            // };
+            // __progress__.pipe(memoryhole0);
+            // receiver__.emit('error', err);
+            __progress__.removeAllListeners('progress');
+            outs__.emit('error', err);
+            return;
+            // return done(err);
+            // __newFile.unpipe();
+            // var memoryhole = new Writable();
+            // memoryhole._write = function (chunk,encoding, cb) {
+            //   console.log(__newFile.filename, chunk.length,'bytes down the drain to the memory hole (draining __newFile)');
+            //   cb();
+            // };
+            // __newFile.pipe(memoryhole);
+            // var x;
+            // console.log('past unpipes');
+            // __countBytes__.unpipe();
+            // outs__.unpipe();
+            // console.log('past unpipes');
+            // while (x !== null) {
+            //   x = __progress__.read();
+            // }
+            // while (x !== null) {
+            //   x = __countBytes__.read();
+            // }
+            // while (x !== null) {
+            //   x = __newFile.read();
+            // }
+            // console.log('past reads');
+            // outs__.end();
+            // console.log('made it');
+
+            // __progress__.on('data', function () {});
+            // __progress__.resume();
+
+
+            // var leaky1 = new Writable();
+            // leaky1._write = function (chunk,encoding, cb) { /*console.log(chunk.length,'bytes down the drain, whee!!!');*/ cb(); };
+            // __newFile.pipe(leaky1);
+
+            // var leaky2 = new Writable();
+            // leaky2._write = function (chunk,encoding, cb) { /*console.log(chunk.length,'bytes down the drain, whee!!!');*/ cb(); };
+            // __countBytes__.pipe(leaky2);
+            //   file.stream.pipe( leaky );
+            // outs__.removeAllListeners();
+            // outs__.end();
+            // outs__.on('error', function (){});
+            // return done(err);
+            // return done();
           }
 
 
@@ -302,7 +391,7 @@ module.exports = function DiskStore (options) {
         // Finally pipe the progress THROUGH the progress stream
         // and out to disk.
         __newFile
-        .pipe(__countBytes__)
+        // .pipe(__countBytes__)
         .pipe(__progress__)
         .pipe(outs__);
 
