@@ -98,6 +98,11 @@ module.exports = function DiskStore (options) {
       objectMode: true
     });
 
+    // if onProgress handler was provided, bind an event automatically:
+    if (_.isFunction(options.onProgress)) {
+      receiver__.on('progress', options.onProgress);
+    }
+
     // Track the progress of each file upload in this Upstream.
     receiver__._files = [];
 
@@ -105,11 +110,40 @@ module.exports = function DiskStore (options) {
     // be enforced.
     var totalBytesWritten = 0;
 
+    // Flag to track whether this file upload has been aborted.
+    // receiver__._aborted = false;
+
+    // And a function to abort it.
+    // (returns true if abort is redundant)
+    // var abort = function () {
+    //   if (receiver__._aborted) return false;
+    //   else receiver__._aborted = true;
+    //   console.log('Aborted receiver.');
+
+    //   // Pipe all of our files to /dev/null
+    //   _.each(receiver__._files, function (file) {
+    //     console.log('piping file ('+file.name+') down the leaky drain');
+    //     var leaky = new Writable();
+    //     leaky._write = function (chunk,encoding, cb) { console.log(chunk.length,'bytes down the drain, whee!!!'); cb(); };
+    //     file.stream.unpipe();
+    //     file.stream.pipe( leaky );
+    //   });
+
+    //   return true;
+    // };
+
     // This `_write` method is invoked each time a new file is received
     // from the Readable stream (Upstream) which is pumping filestreams
     // into this receiver.  (filename === `__newFile.filename`).
     receiver__._write = function onFile(__newFile, encoding, done) {
 
+      var _done = done;
+      done = function () {
+        console.log('CALLED DONE ON RECEIVER WITH ARGS:',Array.prototype.slice.call(arguments));
+        _done.apply(null, Array.prototype.slice.call(arguments));
+      };
+
+      console.log('new file received:', __newFile.filename);
 
       // Determine location where file should be written:
       // -------------------------------------------------------
@@ -132,6 +166,7 @@ module.exports = function DiskStore (options) {
       // Garbage-collect the bytes that were already written for this file.
       // (called when a read or write error occurs)
       function gc(err) {
+
         // console.log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
         adapter.rm(filePath, function (gcErr) {
           if (gcErr) return done([err].concat([gcErr]));
@@ -148,15 +183,24 @@ module.exports = function DiskStore (options) {
           return done(mkdirsErr);
         }
 
-        var outs__ = fsx.createWriteStream(filePath, encoding);
         __newFile.on('error', function (err) {
-          // console.log('***** READ error on file ' + __newFile.filename, '::', err);
+          // var leaky = new Writable();
+          // leaky._write = function (chunk,encoding, cb) { cb(); };
+          // __newFile.unpipe();
+          // __newFile.pipe( leaky );
+          console.log('***** READ error on file ' + __newFile.filename, '::', err);
         });
+
+
+        var outs__ = fsx.createWriteStream(filePath, encoding);
         outs__.on('error', function failedToWriteFile(err) {
-          // console.log('Error on output stream- garbage collecting unfinished uploads...');
+          // if ( !abort() ) return;
+          console.log('Error on output stream- garbage collecting unfinished uploads...');
           gc(err);
         });
         outs__.on('finish', function successfullyWroteFile() {
+          console.log('finished file: '+__newFile.filename);
+          // if ( !abort() ) return;
           done();
         });
 
@@ -207,6 +251,7 @@ module.exports = function DiskStore (options) {
             currentFileProgress.written = milestone.transferred;
             currentFileProgress.total = milestone.length;
             currentFileProgress.percent = milestone.percentage;
+            currentFileProgress.stream = __newFile;
           }
           else {
             currentFileProgress = {
@@ -214,7 +259,8 @@ module.exports = function DiskStore (options) {
               name        : __newFile.filename,
               written     : milestone.transferred,
               total       : milestone.length,
-              percent     : milestone.percentage
+              percent     : milestone.percentage,
+              stream      : __newFile
             };
             receiver__._files.push(currentFileProgress);
           }
@@ -229,23 +275,26 @@ module.exports = function DiskStore (options) {
             return memo;
           }, 0);
 
-          // console.log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
+          console.log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
           // console.log(totalBytesWritten,currentFileProgress);
           // console.log(__newFile._readableState.length);
 
+          // Emit an event on the receiver
+          receiver__.emit('progress', currentFileProgress);
+
           // and then enforce its `maxBytes`.
-          if (totalBytesWritten >= options.maxBytes) {
+          if (options.maxBytes && totalBytesWritten >= options.maxBytes) {
+            // if ( !abort() ) return;
+            // __progress__.removeAllListeners('progress');
             var err = new Error();
             err.code = 'E_EXCEEDS_UPLOAD_LIMIT';
             err.name = 'Upload Error';
             err.maxBytes = options.maxBytes;
             err.written = totalBytesWritten;
             err.message = 'Upload limit of '+err.maxBytes+' bytes exceeded ('+err.written+' bytes written)';
-            receiver__.emit('error', err);
+            return done(err);
           }
 
-          // Emit an event on the receiver
-          receiver__.emit('progress', currentFileProgress);
 
         });
 
@@ -266,4 +315,6 @@ module.exports = function DiskStore (options) {
 
 
 };
+
+
 
