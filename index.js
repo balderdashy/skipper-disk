@@ -110,39 +110,10 @@ module.exports = function DiskStore (options) {
     // be enforced.
     var totalBytesWritten = 0;
 
-    // Flag to track whether this file upload has been aborted.
-    // receiver__._aborted = false;
-
-    // And a function to abort it.
-    // (returns true if abort is redundant)
-    // var abort = function () {
-    //   if (receiver__._aborted) return false;
-    //   else receiver__._aborted = true;
-    //   console.log('Aborted receiver.');
-
-    //   // Pipe all of our files to /dev/null
-    //   _.each(receiver__._files, function (file) {
-    //     console.log('piping file ('+file.name+') down the leaky drain');
-    //     var leaky = new Writable();
-    //     leaky._write = function (chunk,encoding, cb) { console.log(chunk.length,'bytes down the drain, whee!!!'); cb(); };
-    //     file.stream.unpipe();
-    //     file.stream.pipe( leaky );
-    //   });
-
-    //   return true;
-    // };
-
     // This `_write` method is invoked each time a new file is received
     // from the Readable stream (Upstream) which is pumping filestreams
     // into this receiver.  (filename === `__newFile.filename`).
     receiver__._write = function onFile(__newFile, encoding, done) {
-
-
-      // var _done = done;
-      // done = function () {
-      //   console.log('CALLED DONE ON RECEIVER WITH ARGS:',Array.prototype.slice.call(arguments));
-      //   _done.apply(null, Array.prototype.slice.call(arguments));
-      // };
 
       console.log('new file received:', __newFile.filename);
 
@@ -184,31 +155,24 @@ module.exports = function DiskStore (options) {
           return done(mkdirsErr);
         }
 
+        // Error reading from the file stream
         __newFile.on('error', function (err) {
-          // var leaky = new Writable();
-          // leaky._write = function (chunk,encoding, cb) { cb(); };
-          // __newFile.unpipe();
-          // __newFile.pipe( leaky );
           console.log('***** READ error on file ' + __newFile.filename, '::', err);
         });
 
-
+        // Create a new write stream to write to disk
         var outs__ = fsx.createWriteStream(filePath, encoding);
-        outs__.on('error', function failedToWriteFile(err) {
-          // if ( !abort() ) return;
-          console.log('Error on output stream- garbage collecting unfinished uploads...', err);
-          gc(err);
-        });
+
+        // When the file is done writing, call the callback
         outs__.on('finish', function successfullyWroteFile() {
           console.log('finished file: '+__newFile.filename);
-          // if ( !abort() ) return;
           done();
         });
 
-
         // Generate a progress stream and unique id for this file
+        // We will pipe the incoming file stream to this, which will
+        // then pipe the bytes down to the outs___ stream
         var localID = _.uniqueId();
-        // var __progress__ = ProgressStream({});
         var guessedTotal = 0;
         var writtenSoFar = 0;
         var __progress__ = new require('stream').Transform();
@@ -219,7 +183,12 @@ module.exports = function DiskStore (options) {
           guessedTotal += chunk.length;
           writtenSoFar += chunk.length;
 
+          // Do the actual "writing", which in our case will pipe
+          // the bytes to the outs___ stream that writes to disk
           this.push(chunk);
+
+          // Emit an event that will calculate our total upload
+          // progress and determine whether we're within quota
           this.emit('progress', {
             id: localID,
             name: __newFile.name,
@@ -247,22 +216,6 @@ module.exports = function DiskStore (options) {
           speed: 949624
         }
         */
-
-        // Used to calculate total size of this file (used for estimated %, etc.)
-        // var total = (__newFile._readableState && __newFile._readableState.length) || milestone.length;
-        // var guessedTotal = 0;
-        // var __countBytes__ = require('stream').Transform();
-        // __countBytes__._transform = function (chunk, enctype, next) {
-        //   guessedTotal += chunk.length;
-
-        //   // Update the length on the progress stream to make % estimate
-        //   // more accurate:
-        //   __progress__.setLength(guessedTotal);
-
-        //   this.push(chunk);
-        //   next();
-        // };
-
         __progress__.on('progress', function singleFileProgress (milestone) {
 
           // Lookup or create new object to track file progress
@@ -298,26 +251,13 @@ module.exports = function DiskStore (options) {
           }, 0);
 
           console.log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
-          // console.log(totalBytesWritten,currentFileProgress);
-          // console.log(__newFile._readableState.length);
 
-          // Emit an event on the receiver
+          // Emit an event on the receiver.  Someone using Skipper may listen for this to show
+          // a progress bar, for example.
           receiver__.emit('progress', currentFileProgress);
 
           // and then enforce its `maxBytes`.
           if (options.maxBytes && totalBytesWritten >= options.maxBytes) {
-            // if ( !abort() ) return;
-            // __progress__.removeAllListeners('progress');
-
-            // TODO:Pipe the remainder of this file to /dev/null
-            // _.each(receiver__._files, function (file) {
-            //   console.log('piping file ('+file.name+') down the leaky drain');
-            //   var leaky = new Writable();
-            //   leaky._write = function (chunk,encoding, cb) { console.log(chunk.length,'bytes down the drain, whee!!!'); cb(); };
-            //   file.stream.unpipe();
-            //   file.stream.pipe( leaky );
-            // });
-
 
             var err = new Error();
             err.code = 'E_EXCEEDS_UPLOAD_LIMIT';
@@ -325,63 +265,19 @@ module.exports = function DiskStore (options) {
             err.maxBytes = options.maxBytes;
             err.written = totalBytesWritten;
             err.message = 'Upload limit of '+err.maxBytes+' bytes exceeded ('+err.written+' bytes written)';
-            // __newFile.emit('error', err);
-            console.log('unpiping all the things...');
 
-            // __progress__.unpipe();
-            // var memoryhole0 = new Writable();
-            // memoryhole0._write = function (chunk,encoding, cb) {
-            //   console.log(__newFile.filename, chunk.length,'bytes down the drain to the memory hole (draining __progress__)');
-            //   cb();
-            // };
-            // __progress__.pipe(memoryhole0);
-            // receiver__.emit('error', err);
+            // Stop listening for progress events
             __progress__.removeAllListeners('progress');
-            outs__.emit('error', err);
+            // Unpipe the progress stream, which feeds the disk stream, so we don't keep dumping to disk
+            __progress__.unpipe();
+            // Clean up any files we've already written
+            gc(err);
+
+            // Don't do this--it releases the underlying pipes, which confuses node when it's in the middle
+            // of a write operation.
+            // outs__.emit('error', err);
             return;
-            // return done(err);
-            // __newFile.unpipe();
-            // var memoryhole = new Writable();
-            // memoryhole._write = function (chunk,encoding, cb) {
-            //   console.log(__newFile.filename, chunk.length,'bytes down the drain to the memory hole (draining __newFile)');
-            //   cb();
-            // };
-            // __newFile.pipe(memoryhole);
-            // var x;
-            // console.log('past unpipes');
-            // __countBytes__.unpipe();
-            // outs__.unpipe();
-            // console.log('past unpipes');
-            // while (x !== null) {
-            //   x = __progress__.read();
-            // }
-            // while (x !== null) {
-            //   x = __countBytes__.read();
-            // }
-            // while (x !== null) {
-            //   x = __newFile.read();
-            // }
-            // console.log('past reads');
-            // outs__.end();
-            // console.log('made it');
 
-            // __progress__.on('data', function () {});
-            // __progress__.resume();
-
-
-            // var leaky1 = new Writable();
-            // leaky1._write = function (chunk,encoding, cb) { /*console.log(chunk.length,'bytes down the drain, whee!!!');*/ cb(); };
-            // __newFile.pipe(leaky1);
-
-            // var leaky2 = new Writable();
-            // leaky2._write = function (chunk,encoding, cb) { /*console.log(chunk.length,'bytes down the drain, whee!!!');*/ cb(); };
-            // __countBytes__.pipe(leaky2);
-            //   file.stream.pipe( leaky );
-            // outs__.removeAllListeners();
-            // outs__.end();
-            // outs__.on('error', function (){});
-            // return done(err);
-            // return done();
           }
 
 
@@ -391,7 +287,6 @@ module.exports = function DiskStore (options) {
         // Finally pipe the progress THROUGH the progress stream
         // and out to disk.
         __newFile
-        // .pipe(__countBytes__)
         .pipe(__progress__)
         .pipe(outs__);
 
