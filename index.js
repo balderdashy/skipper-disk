@@ -6,7 +6,7 @@ var Writable = require('stream').Writable;
 var fsx = require('fs-extra');
 var path = require('path');
 var _ = require('lodash');
-var ProgressStream = require('progress-stream');
+var UUIDGenerator = require('node-uuid');
 
 
 
@@ -69,11 +69,10 @@ module.exports = function DiskStore (options) {
 
     _.defaults(options, {
 
-      // By default, create new files on disk
-      // using their uploaded filenames.
-      // (no overwrite-checking is performed!!)
-      saveAs: function (__newFile) {
-        return __newFile.filename;
+      // By default, create new files on disk and generate a UUID
+      saveAs: function (__newFile,cb) {
+        options.filename = this.getUUID(__newFile);
+        return cb(null);
       },
 
       // Bind a progress event handler, e.g.:
@@ -110,6 +109,53 @@ module.exports = function DiskStore (options) {
     // be enforced.
     var totalBytesWritten = 0;
 
+
+
+    /* Function to check how many arguments a function have
+    * @param {function} func - Function that sould be checked
+    * @return {integer} - Count of params
+    *
+    * a variant of http://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically-from-javascriptleo
+    */
+
+    function getParamCount(func) {
+
+        var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        var ARGUMENT_NAMES = /([^\s,]+)/g;
+
+        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+        var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+        if(result === null){
+            return 0;
+        }
+
+        return result.length;
+    }
+
+    // If saveAs-Function have no callback (old style)
+    if(getParamCount(options.saveAs) < 2){
+        receiver__.saveAs = function(__newFile,cb){
+            options.filename = options.saveAs(__newFile);
+            return cb(null);
+        };
+    }else{
+        receiver__.saveAs = options.saveAs;
+    }
+
+    /* Generate a UUIDv4 Filename
+     * @param {string} filename - Filename (e.g. 'foo.jpg')
+     * @return {string} - UUID-Filename like 24d5f444-38b4-4dc3-b9c3-74cb7fbbc932.jpg - if filename invalid returns ""
+     *
+     */
+    receiver__.getUUID = function(filename){
+        // if Filename was passend
+        if (filename !== undefined && filename !== ""){
+            return UUIDGenerator.v4() + path.extname(filename);
+        }else{
+            return "";
+        }
+    };
+
     // This `_write` method is invoked each time a new file is received
     // from the Readable stream (Upstream) which is pumping filestreams
     // into this receiver.  (filename === `__newFile.filename`).
@@ -129,11 +175,21 @@ module.exports = function DiskStore (options) {
       else {
         // Otherwise, use the more sophisiticated options:
         dirPath = path.resolve(options.dirname);
-        filename = options.filename || options.saveAs(__newFile);
+
+        // if Filename was set
+        if(options.filename === undefined || options.filename === ""){
+            filename = this.getUUID(__newFile.filename);
+        }else{
+            filename = options.filename;
+        }
+
         filePath = path.join(dirPath, filename);
       }
-      // -------------------------------------------------------
 
+      // Add write-filename to the file
+      __newFile.filename_write = filename;
+
+      // -------------------------------------------------------
 
       // Garbage-collect the bytes that were already written for this file.
       // (called when a read or write error occurs)
