@@ -13,6 +13,7 @@ var ProgressStream = require('progress-stream');
 /**
  * skipper-disk
  *
+ * @type {Function}
  * @param  {Object} options
  * @return {Object}
  */
