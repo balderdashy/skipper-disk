@@ -21,6 +21,8 @@ var ProgressStream = require('progress-stream');
 module.exports = function DiskStore (options) {
   options = options || {};
 
+  var log = options.log || function _noOpLog(){};
+
   var adapter = {
 
     rm: function (filepath, cb){
@@ -79,11 +81,11 @@ module.exports = function DiskStore (options) {
 
       // Bind a progress event handler, e.g.:
       // function (milestone) {
-      //   milestone.id
-      //   milestone.name
-      //   milestone.written
-      //   milestone.total
-      //   milestone.percent
+      //   milestone.id;
+      //   milestone.name;
+      //   milestone.written;
+      //   milestone.total;
+      //   milestone.percent;
       // },
       onProgress: undefined,
 
@@ -116,8 +118,6 @@ module.exports = function DiskStore (options) {
     // into this receiver.  (filename === `__newFile.filename`).
     receiver__._write = function onFile(__newFile, encoding, done) {
 
-      console.log('new file received:', __newFile.filename);
-
       // Determine location where file should be written:
       // -------------------------------------------------------
       var filePath, dirPath, filename;
@@ -140,7 +140,7 @@ module.exports = function DiskStore (options) {
       // (called when a read or write error occurs)
       function gc(err) {
 
-        // console.log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
+        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
         adapter.rm(filePath, function (gcErr) {
           if (gcErr) return done([err].concat([gcErr]));
           else return done(err);
@@ -158,7 +158,7 @@ module.exports = function DiskStore (options) {
 
         // Error reading from the file stream
         __newFile.on('error', function (err) {
-          console.log('***** READ error on file ' + __newFile.filename, '::', err);
+          log('***** READ error on file ' + __newFile.filename, '::', err);
         });
 
         // Create a new write stream to write to disk
@@ -166,7 +166,7 @@ module.exports = function DiskStore (options) {
 
         // When the file is done writing, call the callback
         outs__.on('finish', function successfullyWroteFile() {
-          console.log('finished file: '+__newFile.filename);
+          log('finished file: '+__newFile.filename);
           done();
         });
 
@@ -251,7 +251,7 @@ module.exports = function DiskStore (options) {
             return memo;
           }, 0);
 
-          console.log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
+          log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
 
           // Emit an event on the receiver.  Someone using Skipper may listen for this to show
           // a progress bar, for example.
