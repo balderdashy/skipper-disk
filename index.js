@@ -18,28 +18,29 @@ var UUIDGenerator = require('node-uuid');
  * @return {Object}
  */
 
-module.exports = function DiskStore (options) {
+module.exports = function DiskStore(options) {
   options = options || {};
 
-  var log = options.log || function _noOpLog(){};
+  var log = options.log || function _noOpLog() {};
 
   var adapter = {
 
-    rm: function (filepath, cb){
+    rm: function(filepath, cb) {
       return fsx.unlink(filepath, function(err) {
         // Ignore "doesn't exist" errors
-        if (err && err.code !== 'ENOENT') { return cb(err); }
+        if (err && (typeof err !== 'object' || err.code !== 'ENOENT')) {
+          return cb(err);
+        }
         else return cb();
       });
     },
-    ls: function (dirpath, cb) {
+    ls: function(dirpath, cb) {
       return fsx.readdir(dirpath, cb);
     },
-    read: function (filepath, cb) {
+    read: function(filepath, cb) {
       if (cb) {
         return fsx.readFile(filepath, cb);
-      }
-      else {
+      } else {
         return fsx.createReadStream(filepath);
       }
     },
@@ -49,6 +50,20 @@ module.exports = function DiskStore (options) {
   };
 
   return adapter;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   /**
@@ -61,19 +76,27 @@ module.exports = function DiskStore (options) {
    * @param  {Object} options
    * @return {Stream.Writable}
    */
-  function DiskReceiver (options) {
+  function DiskReceiver(options) {
     options = options || {};
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Removed this normalization:
+    // TODO: handle in skipper core
+    // (~mike)
+    //
     // Normalize `saveAs()` option:
     // options.saveAs() <==> options.rename() <==> options.getFilename() <==> options.getFileName()
-    options.saveAs = options.saveAs || options.rename;
-    options.saveAs = options.saveAs || options.getFileName;
-    options.saveAs = options.saveAs || options.getFilename;
+    // options.saveAs = options.saveAs || options.rename;
+    // options.saveAs = options.saveAs || options.getFileName;
+    // options.saveAs = options.saveAs || options.getFilename;
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     _.defaults(options, {
 
       // By default, create new files on disk and generate a UUID
-      saveAs: function (__newFile,cb) {
+      saveAs: function(__newFile, cb) {
         options.filename = this.getUUID(__newFile);
         return cb(null);
       },
@@ -114,49 +137,69 @@ module.exports = function DiskStore (options) {
 
 
 
-    /* Function to check how many arguments a function have
-    * @param {function} func - Function that sould be checked
-    * @return {integer} - Count of params
-    *
-    * a variant of http://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically-from-javascriptleo
-    */
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Removing the stuff below unless it's frequently requested
+    // This is in order avoid issues with userland fns which implement `arguments[i]` usage, etc.
+    //
+    // Instead, just do:
+    receiver__.saveAs = options.saveAs;
 
-    function getParamCount(func) {
 
-        var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-        var ARGUMENT_NAMES = /([^\s,]+)/g;
+    // <removed-this-stuff>
+    //
+    // /*
+    //  * Get arity of `func`
+    //  *
+    //  * @param {function} func - Function that sould be checked
+    //  * @return {integer} - Count of params
+    //  *
+    //  * a variant of http://stackoverflow.com/questions/1007981/how-to-get-function-parameter-names-values-dynamically-from-javascriptleo
+    //  */
 
-        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
-        var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
-        if(result === null){
-            return 0;
-        }
+    // function getArity(func) {
 
-        return result.length;
-    }
+    //   var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+    //   var ARGUMENT_NAMES = /([^\s,]+)/g;
+
+    //   var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    //   var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+    //   if (result === null) {
+    //     return 0;
+    //   }
+
+    //   return result.length;
+    // }
 
     // If saveAs-Function have no callback (old style)
-    if(getParamCount(options.saveAs) < 2){
-        receiver__.saveAs = function(__newFile,cb){
-            options.filename = options.saveAs(__newFile);
-            return cb(null);
-        };
-    }else{
-        receiver__.saveAs = options.saveAs;
-    }
+    // if (getArity(options.saveAs) < 2) {
+    //   receiver__.saveAs = function(__newFile, cb) {
+    //     options.filename = options.saveAs(__newFile);
+    //     return cb(null);
+    //   };
+    // } else {
+    //   receiver__.saveAs = options.saveAs;
+    // }
+    //
+    // </removed-this-stuff>
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
 
     /* Generate a UUIDv4 Filename
      * @param {string} filename - Filename (e.g. 'foo.jpg')
      * @return {string} - UUID-Filename like 24d5f444-38b4-4dc3-b9c3-74cb7fbbc932.jpg - if filename invalid returns ""
      *
      */
-    receiver__.getUUID = function(filename){
-        // if Filename was passend
-        if (filename !== undefined && filename !== ""){
-            return UUIDGenerator.v4() + path.extname(filename);
-        }else{
-            return "";
-        }
+    receiver__.getUUID = function(filename) {
+      // if Filename was passend
+      if (filename !== undefined && filename !== "") {
+        return UUIDGenerator.v4() + path.extname(filename);
+      } else {
+        return "";
+      }
     };
 
     // This `_write` method is invoked each time a new file is received
@@ -172,16 +215,15 @@ module.exports = function DiskStore (options) {
         filePath = options.id;
         dirPath = path.dirname(filePath);
         filename = path.basename(filePath);
-      }
-      else {
+      } else {
         // Otherwise, use the more sophisiticated options:
         dirPath = path.resolve(options.dirname);
 
         // if Filename was set
-        if(options.filename === undefined || options.filename === ""){
-            filename = this.getUUID(__newFile.filename);
-        }else{
-            filename = options.filename;
+        if (options.filename === undefined || options.filename === "") {
+          filename = this.getUUID(__newFile.filename);
+        } else {
+          filename = options.filename;
         }
 
         filePath = path.join(dirPath, filename);
@@ -197,14 +239,14 @@ module.exports = function DiskStore (options) {
       function gc(err) {
 
         log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + filePath + '...');
-        adapter.rm(filePath, function (gcErr) {
+        adapter.rm(filePath, function(gcErr) {
           if (gcErr) return done([err].concat([gcErr]));
           else return done(err);
         });
       }
 
       // Ensure necessary parent directories exist:
-      fsx.mkdirs(dirPath, function (mkdirsErr) {
+      fsx.mkdirs(dirPath, function(mkdirsErr) {
         // If we get an error here, it's probably because the Node
         // user doesn't have write permissions at the designated
         // path.
@@ -213,7 +255,7 @@ module.exports = function DiskStore (options) {
         }
 
         // Error reading from the file stream
-        __newFile.on('error', function (err) {
+        __newFile.on('error', function(err) {
           log('***** READ error on file ' + __newFile.filename, '::', err);
         });
 
@@ -222,7 +264,7 @@ module.exports = function DiskStore (options) {
 
         // When the file is done writing, call the callback
         outs__.on('finish', function successfullyWroteFile() {
-          log('finished file: '+__newFile.filename);
+          log('finished file: ' + __newFile.filename);
           done();
         });
 
@@ -233,7 +275,7 @@ module.exports = function DiskStore (options) {
         var guessedTotal = 0;
         var writtenSoFar = 0;
         var __progress__ = new require('stream').Transform();
-        __progress__._transform = function (chunk,enctype,next) {
+        __progress__._transform = function(chunk, enctype, next) {
 
           // Update the guessedTotal to make % estimate
           // more accurate:
@@ -251,7 +293,7 @@ module.exports = function DiskStore (options) {
             name: __newFile.name,
             written: writtenSoFar,
             total: guessedTotal,
-            percent: (writtenSoFar/guessedTotal)*100 | 0
+            percent: (writtenSoFar / guessedTotal) * 100 | 0
           });
           next();
         };
@@ -273,7 +315,7 @@ module.exports = function DiskStore (options) {
           speed: 949624
         }
         */
-        __progress__.on('progress', function singleFileProgress (milestone) {
+        __progress__.on('progress', function singleFileProgress(milestone) {
 
           // Lookup or create new object to track file progress
           var currentFileProgress = _.find(receiver__._files, {
@@ -284,15 +326,14 @@ module.exports = function DiskStore (options) {
             currentFileProgress.total = milestone.total;
             currentFileProgress.percent = milestone.percent;
             currentFileProgress.stream = __newFile;
-          }
-          else {
+          } else {
             currentFileProgress = {
-              id          : localID,
-              name        : __newFile.filename,
-              written     : milestone.written,
-              total       : milestone.total,
-              percent     : milestone.percent,
-              stream      : __newFile
+              id: localID,
+              name: __newFile.filename,
+              written: milestone.written,
+              total: milestone.total,
+              percent: milestone.percent,
+              stream: __newFile
             };
             receiver__._files.push(currentFileProgress);
           }
@@ -302,12 +343,12 @@ module.exports = function DiskStore (options) {
           // Recalculate `totalBytesWritten` so far for this receiver instance
           // (across ALL OF ITS FILES)
           // using the sum of all bytes written to each file in `receiver__._files`
-          totalBytesWritten = _.reduce(receiver__._files, function (memo, status) {
+          totalBytesWritten = _.reduce(receiver__._files, function(memo, status) {
             memo += status.written;
             return memo;
           }, 0);
 
-          log(currentFileProgress.percent, '::', currentFileProgress.written,'/',currentFileProgress.total, '       (file #'+currentFileProgress.id+'   :: '+/*'update#'+counter*/''+')');//receiver__._files.length+' files)');
+          log(currentFileProgress.percent, '::', currentFileProgress.written, '/', currentFileProgress.total, '       (file #' + currentFileProgress.id + '   :: ' + /*'update#'+counter*/ '' + ')'); //receiver__._files.length+' files)');
 
           // Emit an event on the receiver.  Someone using Skipper may listen for this to show
           // a progress bar, for example.
@@ -321,7 +362,7 @@ module.exports = function DiskStore (options) {
             err.name = 'Upload Error';
             err.maxBytes = options.maxBytes;
             err.written = totalBytesWritten;
-            err.message = 'Upload limit of '+err.maxBytes+' bytes exceeded ('+err.written+' bytes written)';
+            err.message = 'Upload limit of ' + err.maxBytes + ' bytes exceeded (' + err.written + ' bytes written)';
 
             // Stop listening for progress events
             __progress__.removeAllListeners('progress');
@@ -344,8 +385,8 @@ module.exports = function DiskStore (options) {
         // Finally pipe the progress THROUGH the progress stream
         // and out to disk.
         __newFile
-        .pipe(__progress__)
-        .pipe(outs__);
+          .pipe(__progress__)
+          .pipe(outs__);
 
       });
 
@@ -356,6 +397,3 @@ module.exports = function DiskStore (options) {
 
 
 };
-
-
-
