@@ -70,6 +70,9 @@ var receiving = blobAdapter.receive({
 
 ## Advanced Usage
 
+> **Warning:**
+> You probably shouldn't try doing anything in this section unless you've implemented streams before, and in particular _streams2_ (i.e. "suck", not "spew" streams).
+
 #### `upstream.pipe(receiving)`
 
 As an alternative to the `upload()` method, you can pipe an incoming **upstream** returned from `req.file()` (a Readable stream of Readable binary streams) directly to the **receiver** (a Writable stream for Upstreams.)
