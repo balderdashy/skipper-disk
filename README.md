@@ -5,7 +5,6 @@
 
 Local filesystem adapter for receiving streams of file streams. Particularly useful for streaming multipart file uploads via [Skipper](github.com/balderdashy/skipper).
 
-> This module is bundled as the default blob adapter in Skipper, and consequently [Sails](https://github.com/balderdashy/sails).
 
 ========================================
 
@@ -15,9 +14,107 @@ Local filesystem adapter for receiving streams of file streams. Particularly use
 $ npm install skipper-disk --save
 ```
 
+Also make sure you have skipper [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).
+
+> Skipper is installed by defaut in [Sails](https://github.com/balderdashy/sails) v0.10.
+
 ========================================
 
 ## Usage
+
+> This module is bundled as the default file upload adapter in Skipper, so the following usage is slightly simpler than it is with the other Skipper file upload adapters.
+
+In the route(s) / controller action(s) where you want to accept file uploads, do something like:
+
+```javascript
+function (req, res) {
+  req.file('avatar')
+  .upload(function whenDone(err, uploadedFiles) {
+    if (err) return res.negotiate(err);
+    else return res.json({
+      files: uploadedFiles,
+      textParams: req.params.all()
+    });
+  });
+}
+```
+
+
+========================================
+
+## Details
+
+
+```javascript
+function (req, res) {
+
+  req.file('avatar')
+  .upload({
+
+    // Specify skipper-disk explicitly (you don't need to do this b/c skipper-disk is the default)
+    adapter: require('skipper-disk'),
+  
+    // You can apply a file upload limit (in bytes)
+    maxBytes: 1000000
+    
+  }, function whenDone(err, uploadedFiles) {
+    if (err) return res.negotiate(err);
+    else return res.json({
+      files: uploadedFiles,
+      textParams: req.params.all()
+    });
+  });
+}
+```
+
+
+| Option    | Type       | Details |
+|-----------|:----------:|---------|
+| `dirname`  | ((string)) | The path to the directory on disk where file uploads should be streamed.  May be specified as an absolute path (e.g. `/Users/mikermcneil/foo`) or a relative path from the current working directory.  Defaults to `".tmp/uploads/"`. `dirname` can be used with `saveAs`- the filename from saveAs will be relative to dirname.
+| `saveAs()`  | ((function)) -or- ((string)) | Optional.  By default, Skipper decides an "at-rest" filename for your uploaded files (called the `fd`) by generating a UUID and combining it with the file's original file extension when it was uploaded ("e.g. 24d5f444-38b4-4dc3-b9c3-74cb7fbbc932.jpg"). <br/>  If `saveAs` is specified as a string, any uploaded file(s) will be saved to that particular path instead (useful for simple single-file uploads).<br/> If `saveAs` is specified as a function, that function will be called each time a file is received, passing it the raw stream and a callback. When ready, your `saveAs` function should call the callback, passing the appropriate at-rest filename (`fd`) as the second argument to the callback (and passing an error as the first argument if something went wrong). For example: <br/> `function (__newFileStream,cb) { cb(null, 'theUploadedFile.foo'); }`   |
+
+
+========================================
+
+## Specifying Options
+
+All options may be passed in using any of the following approaches, in ascending priority order (e.g. the 3rd appraoch overrides the 1st)
+
+
+##### 1. In the blob adapter's factory method:
+
+```js
+var blobAdapter = require('skipper-disk')({
+  // These options will be applied unless overridden.
+});
+```
+
+##### 2. In a call to the `.receive()` factory method:
+
+```js
+var receiving = blobAdapter.receive({
+  // Options will be applied only to this particular receiver.
+});
+```
+
+##### 3. Directly into the `.upload()` method of the Upstream returned by `req.file()`:
+
+```js
+var upstream = req.file('foo').upload({
+  // These options will be applied unless overridden.
+});
+```
+
+========================================
+
+## Low-Level Usage
+
+> **Warning:**
+> You probably shouldn't try doing anything in this section unless you've implemented streams before, and in particular _streams2_ (i.e. "suck", not "spew" streams).
+
+
+
+#### File adapter instances, receivers, upstreams, and binary streams
 
 First instantiate a blob adapter (`blobAdapter`):
 
@@ -31,7 +128,7 @@ Build a receiver (`receiving`):
 var receiving = blobAdapter.receive();
 ```
 
-Then stream file(s) from a particular field (`req.file('foo')`):
+Then you can stream file(s) from a particular field (`req.file('foo')`):
 
 ```js
 req.file('foo').upload(receiving, function (err, filesUploaded) {
@@ -39,39 +136,6 @@ req.file('foo').upload(receiving, function (err, filesUploaded) {
 });
 ```
 
-========================================
-
-## Options
-
-All options may be passed either into the blob adapter's factory method:
-
-```js
-var blobAdapter = require('skipper-disk')({
-  // These options will be applied unless overridden.
-});
-```
-
-Or directly into a receiver:
-
-```js
-var receiving = blobAdapter.receive({
-  // Options will be applied only to this particular receiver.
-});
-```
-
-
-| Option    | Type       | Details |
-|-----------|:----------:|---------|
-| `dirname`  | ((string)) | The path to the directory on disk where file uploads should be streamed.  May be specified as an absolute path (e.g. `/Users/mikermcneil/foo`) or a relative path from the current working directory.  Defaults to `".tmp/uploads/"`. `dirname` can be used with `saveAs`- the filename from saveAs will be relative to dirname.
-| `saveAs()`  | ((function)) -or- ((string)) | Optional.  By default, Skipper decides an "at-rest" filename for your uploaded files (called the `fd`) by generating a UUID and combining it with the file's original file extension when it was uploaded ("e.g. 24d5f444-38b4-4dc3-b9c3-74cb7fbbc932.jpg"). <br/>  If `saveAs` is specified as a string, any uploaded file(s) will be saved to that particular path instead (useful for simple single-file uploads).<br/> If `saveAs` is specified as a function, that function will be called each time a file is received, passing it the raw stream and a callback. When ready, your `saveAs` function should call the callback, passing the appropriate at-rest filename (`fd`) as the second argument to the callback (and passing an error as the first argument if something went wrong). For example: <br/> `function (__newFileStream,cb) { cb(null, 'theUploadedFile.foo'); }`   |
-
-
-========================================
-
-## Advanced Usage
-
-> **Warning:**
-> You probably shouldn't try doing anything in this section unless you've implemented streams before, and in particular _streams2_ (i.e. "suck", not "spew" streams).
 
 #### `upstream.pipe(receiving)`
 
@@ -89,6 +153,8 @@ req.file('foo')
 .on('finish', function onSuccess() { ... })
 .pipe(receiving)
 ```
+
+
 
 ========================================
 
