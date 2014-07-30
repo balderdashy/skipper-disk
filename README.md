@@ -63,7 +63,7 @@ var receiving = blobAdapter.receive({
 | Option    | Type       | Details |
 |-----------|:----------:|---------|
 | `dirname`  | ((string)) | The path to the directory on disk where file uploads should be streamed.  May be specified as an absolute path (e.g. `/Users/mikermcneil/foo`) or a relative path from the current working directory.  Defaults to `".tmp/uploads/"`
-| `saveAs()`  | ((function)) | An optional function that can be used to define the logic for naming files. For example: <br/> `function (file) {return Math.random()+file.name;} });` <br/> By default, the filename of the uploaded file is used, including the extension (e.g. `"Screen Shot 2014-05-06 at 4.44.02 PM.jpg"`.  If a file already exists at `dirname` with the same name, it will be overridden. |
+| `saveAs()`  | ((function)) | An optional function that can be used to define the logic for naming files (with callback optional). For example: <br/> `function (file) {return Math.random()+file.name;}` or `function (filename,cb) {foo.asyncall(function(err,result){ options.filename = result[0]; cb(null)}); }`<br/> By default, Skipper-disk generate a random-Number for filename on your disk (e.g. 24d5f444-38b4-4dc3-b9c3-74cb7fbbc932.jpg) - that is given as "id" in upload()-callback.  <br/>   |
 
 
 ========================================
