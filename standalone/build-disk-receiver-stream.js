@@ -80,7 +80,7 @@ module.exports = function buildDiskReceiverStream(options) {
     // If fd DOESNT have leading slash, resolve the path
     // from process.cwd()
     if (!__newFile.fd.match(/^\//)) {
-      __newFile.fd = path.resolve(__newFile.fd);
+      __newFile.fd = path.resolve(process.cwd(), '.tmp/uploads', __newFile.fd);
     }
 
     // Ensure necessary parent directories exist:
