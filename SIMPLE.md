@@ -36,7 +36,7 @@ module.exports = function writeFile(__newFile) {
   }
   fsx.mkdirs(path.dirname(__newFile.fd), function(err) {
     if (err) return __newFile.emit('error', err);
-    __newFile.pipe(fsx.createWriteStream(fd));
+    __newFile.pipe(fsx.createWriteStream(__newFile.fd));
   });
 };
 ```
