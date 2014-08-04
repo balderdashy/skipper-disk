@@ -23,9 +23,8 @@ var r_buildProgressStream = require('./build-progress-stream');
  * @return {Stream.Writable}
  */
 module.exports = function buildDiskReceiverStream(options) {
-  var log = options.log || function noOpLog(){};
-
   options = options || {};
+  var log = options.log || function noOpLog(){};
 
   _.defaults(options, {
 
