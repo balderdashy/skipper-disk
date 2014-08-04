@@ -1,6 +1,6 @@
 # Simplified example
 
-It is helpful to look at a simple example of what the `receive()` method defined in this adapter might look like if it was simplified somewhat:
+It is helpful to look at a somewhat simplified example of the `receive()` method defined in this adapter:
 
 ```js
 module.exports = function receive(options) {
