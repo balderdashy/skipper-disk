@@ -16,7 +16,7 @@ $ npm install skipper-disk --save
 
 Also make sure you have skipper [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).
 
-> Skipper is installed by defaut in [Sails](https://github.com/balderdashy/sails) v0.10.
+> Skipper is installed by default in [Sails](https://github.com/balderdashy/sails) as of v0.10.
 
 ========================================
 
@@ -28,7 +28,9 @@ In the route(s) / controller action(s) where you want to accept file uploads, do
 
 ```javascript
 req.file('avatar')
-.upload(function whenDone(err, uploadedFiles) {
+.upload({
+  // ...options here...
+},function whenDone(err, uploadedFiles) {
   if (err) return res.negotiate(err);
   else return res.ok({
     files: uploadedFiles,
@@ -37,33 +39,7 @@ req.file('avatar')
 });
 ```
 
-
-========================================
-
-## Details
-
-
-```javascript
-function (req, res) {
-
-  req.file('avatar')
-  .upload({
-
-    // Specify skipper-disk explicitly (you don't need to do this b/c skipper-disk is the default)
-    adapter: require('skipper-disk'),
-
-    // You can apply a file upload limit (in bytes)
-    maxBytes: 1000000
-
-  }, function whenDone(err, uploadedFiles) {
-    if (err) return res.negotiate(err);
-    else return res.json({
-      files: uploadedFiles,
-      textParams: req.params.all()
-    });
-  });
-}
-```
+For more detailed usage information and a full list of available options, see the Skipper docs, especially the section on "[https://github.com/balderdashy/skipper#uploading-files-to-disk](Uploading to Local Disk)".
 
 ========================================
 
