@@ -4,7 +4,7 @@
   "description": "Receive Skipper's file uploads on your local filesystem",
   "main": "index.js",
   "scripts": {
-    "test": "node -e \"require('skipper-adapter-tests')({module: require('./')});\""
+    "test": "node -e \"require('skipper-adapter-tests')({mocha: require('minimist')(process.argv.slice(2)), module: require('./')});\""
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
   },
   "homepage": "https://github.com/balderdashy/skipper-disk",
   "devDependencies": {
-    "skipper-adapter-tests": "~1.1.2"
+    "skipper-adapter-tests": "~1.1.2",
+    "minimist": "~0.2.0"
   },
   "dependencies": {
     "fs-extra": "~0.8.1",
