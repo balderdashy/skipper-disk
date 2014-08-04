@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/balderdashy/skipper-disk",
   "devDependencies": {
-    "skipper-adapter-tests": "~1.1.2"
+    "skipper-adapter-tests": "~1.5.0"
   },
   "dependencies": {
     "fs-extra": "~0.8.1",
