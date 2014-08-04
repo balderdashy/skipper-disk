@@ -84,7 +84,7 @@ module.exports = function buildDiskReceiverStream(options) {
     }
 
     // Ensure necessary parent directories exist:
-    fsx.mkdirs(path.dirname(fd), function(mkdirsErr) {
+    fsx.mkdirs(path.dirname(__newFile.fd), function(mkdirsErr) {
       // If we get an error here, it's probably because the Node
       // user doesn't have write permissions at the designated
       // path.
@@ -98,7 +98,7 @@ module.exports = function buildDiskReceiverStream(options) {
       });
 
       // Create a new write stream to write to disk
-      var outs__ = fsx.createWriteStream(fd, encoding);
+      var outs__ = fsx.createWriteStream(__newFile.fd, encoding);
 
       // When the file is done writing, call the callback
       outs__.on('finish', function successfullyWroteFile() {

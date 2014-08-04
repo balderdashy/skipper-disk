@@ -10,10 +10,10 @@ module.exports = function receive(options) {
       __newFile.fd = path.resolve(__newFile.fd);
     }
 
-    fsx.mkdirs(path.dirname(fd), function(mkdirsErr) {
+    fsx.mkdirs(path.dirname(__newFile.fd), function(mkdirsErr) {
       if (mkdirsErr) return done(mkdirsErr);
 
-      var outs__ = fsx.createWriteStream(fd);
+      var outs__ = fsx.createWriteStream(__newFile.fd);
       outs__.on('finish', function successfullyWroteFile() {
         done();
       });
