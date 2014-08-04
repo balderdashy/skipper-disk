@@ -136,6 +136,7 @@ req.file('foo').upload(receiving, function (err, filesUploaded) {
 });
 ```
 
+<!--
 
 #### `upstream.pipe(receiving)`
 
@@ -154,7 +155,7 @@ req.file('foo')
 .pipe(receiving)
 ```
 
-
+-->
 
 ========================================
 
