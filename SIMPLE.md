@@ -23,3 +23,29 @@ module.exports = function receive(options) {
   return receiver__;
 };
 ```
+
+
+### Food for thought
+
+We could change the fsadapter api to define a `writeFile` method instead-- something like:
+
+```js
+module.exports = function writeFile(__newFile) {
+  if (!__newFile.fd.match(/^\//)) {
+    __newFile.fd = path.resolve(__newFile.fd);
+  }
+  fsx.mkdirs(path.dirname(__newFile.fd), function(err) {
+    if (err) return __newFile.emit('error', err);
+    __newFile.pipe(fsx.createWriteStream(fd));
+  });
+};
+```
+
+This has 3 main advantages:
+
++ It is more concise.
++ No need to worry about the `done` callback.  Just pipe the __newFile stream some place.
++ No need to worry about instantiating your own object-mode write stream.
+
+We could also still keep support for the `.receive()` method-- obviously for backwards-compatibility, but also as a way to offer a lower-level api while still allowing for easier integration using `.writeFile()`.
+
