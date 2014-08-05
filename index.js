@@ -2,8 +2,11 @@
  * Module dependencies
  */
 
+var path = require('path');
+var _ = require('lodash');
 var fsx = require('fs-extra');
 var r_buildDiskReceiverStream = require('./standalone/build-disk-receiver-stream');
+
 
 
 /**
@@ -31,7 +34,15 @@ module.exports = function DiskStore(options) {
     },
 
     ls: function(dirpath, cb) {
-      return fsx.readdir(dirpath, cb);
+      return fsx.readdir(dirpath, function (err, files){
+        if (err) return cb(err);
+        files = _.reduce(_.isArray(files)?files:[], function (m, filename){
+          var fd = path.join(dirpath,filename);
+          m.push(fd);
+          return m;
+        }, []);
+        cb(null, files);
+      });
     },
 
     read: function(fd, cb) {
