@@ -12,9 +12,8 @@ Local filesystem adapter for receiving [upstreams](https://github.com/balderdash
 $ npm install skipper-disk --save
 ```
 
-Also make sure you have skipper [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).
+If you're using this module with Express, Connect, Kraken, or a vanilla Node.js server, make sure you have skipper itself [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).  This is the default configuration in [Sails](https://github.com/balderdashy/sails) as of v0.10.
 
-> Skipper is installed by default in [Sails](https://github.com/balderdashy/sails) as of v0.10.
 
 
 ## Usage
