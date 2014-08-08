@@ -6,8 +6,6 @@
 Local filesystem adapter for receiving [upstreams](https://github.com/balderdashy/skipper#what-are-upstreams). Particularly useful for streaming multipart file uploads from the [Skipper](github.com/balderdashy/skipper) body parser.
 
 
-========================================
-
 ## Installation
 
 ```
@@ -18,7 +16,6 @@ Also make sure you have skipper [installed as your body parser](http://beta.sail
 
 > Skipper is installed by default in [Sails](https://github.com/balderdashy/sails) as of v0.10.
 
-========================================
 
 ## Usage
 
@@ -39,13 +36,14 @@ req.file('avatar')
 });
 ```
 
-For more detailed usage information and a full list of available options, see the Skipper docs, especially the section on "[https://github.com/balderdashy/skipper#uploading-files-to-disk](Uploading to Local Disk)".
+For more detailed usage information and a full list of available options, see the Skipper repo, especially the section on "[https://github.com/balderdashy/skipper#uploading-files-to-disk](Uploading to Local Disk)".
 
-========================================
 
 ## Contribute
 
-See `CONTRIBUTING.md`.
+See [ROADMAP.md](https://github.com/balderdashy/skipper-s3/blob/master/ROADMAP.md).
+
+Also be sure to check out [ROADMAP.md in the Skipper repo](https://github.com/balderdashy/skipper/blob/master/ROADMAP.md).
 
 To run the tests:
 
@@ -53,11 +51,10 @@ To run the tests:
 $ npm test
 ```
 
-Also be sure to check out [ROADMAP.md in the Skipper repo](https://github.com/balderdashy/skipper/blob/master/ROADMAP.md).
 
-========================================
 
-### License
+
+## License
 
 **[MIT](./LICENSE)**
 &copy; 2013, 2014-
