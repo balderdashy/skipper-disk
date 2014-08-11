@@ -27,11 +27,11 @@ module.exports = function buildDiskReceiverStream(options) {
   // if maxBytes is configed in "MB" ended string
   // convert it into bytes
   if (options.maxBytes) {
-    var _maxBytesRegResult = (options.maxBytes + '').match(/(\d+)m/i)
+    var _maxBytesRegResult = (options.maxBytes + '').match(/(\d+)m/i);
     if (_maxBytesRegResult != null){
-      options.maxBytes = _maxBytesRegResult[1] * 1024 * 1024)
+      options.maxBytes = _maxBytesRegResult[1] * 1024 * 1024;
     }
-  }
+  };
 
   _.defaults(options, {
 
