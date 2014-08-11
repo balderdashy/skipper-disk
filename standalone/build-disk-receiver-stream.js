@@ -24,6 +24,15 @@ module.exports = function buildDiskReceiverStream(options) {
   options = options || {};
   var log = options.log || function noOpLog(){};
 
+  // if maxBytes is configed in "MB" ended string
+  // convert it into bytes
+  if (options.maxBytes) {
+    var _maxBytesRegResult = (options.maxBytes + '').match(/(\d+)m/i);
+    if (_maxBytesRegResult != null){
+      options.maxBytes = _maxBytesRegResult[1] * 1024 * 1024;
+    }
+  };
+
   _.defaults(options, {
 
     // // The default `saveAs` implements a unique filename by combining:
