@@ -120,7 +120,9 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       // Stop listening for progress events
       __progress__.removeAllListeners('progress');
       // Unpipe the progress stream, which feeds the disk stream, so we don't keep dumping to disk
-      __progress__.unpipe();
+      process.nextTick(function() {
+        __progress__.unpipe();
+      });
       // Clean up any files we've already written
       (function gc(err) {
       // Garbage-collects the bytes that were already written for this file.
