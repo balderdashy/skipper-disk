@@ -131,7 +131,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         });
       }
       else {
-        __hash__ = null;
+        var __hash__ = null;
       }
 
       var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, __hash__, adapter);
