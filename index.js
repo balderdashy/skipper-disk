@@ -51,12 +51,13 @@ module.exports = function DiskStore(options) {
       } else {
         return fsx.createReadStream(fd);
       }
-    },
-
-    receive: function (options){
-      return r_buildDiskReceiverStream(options);
     }
+
   };
+
+  adapter.receive = function (options){
+    return r_buildDiskReceiverStream(options);
+  }
 
   return adapter;
 };

@@ -125,7 +125,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       (function gc(err) {
       // Garbage-collects the bytes that were already written for this file.
       // (called when a read or write error occurs)
-        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + fd + '...');
+        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + __newFile._skipperFD + '...');
         adapter.rm(fd, function(gcErr) {
           if (gcErr) return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',[err].concat([gcErr]));
           return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',err);
