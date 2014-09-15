@@ -33,6 +33,6 @@
   "dependencies": {
     "fs-extra": "~0.8.1",
     "lodash": "~2.4.1",
-    "node-uuid": "~1.4.1"
+    "digest-stream": "~0.2.2"
   }
 }
