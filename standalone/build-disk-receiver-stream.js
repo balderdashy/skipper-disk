@@ -140,7 +140,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
       // and out to disk.
       var fileStream = __newFile.pipe(__progress__);
 
-      if(__hash__) fileStream.pipe(__hash__);
+      if(__hash__) fileStream = fileStream.pipe(__hash__);
 
       fileStream.pipe(outs__);
 
