@@ -57,9 +57,15 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
     maxBytes: 15000000,
 
     // By default, upload files to `./.tmp/uploads` (relative to cwd)
-    dirname: '.tmp/uploads'
+    dirname: '.tmp/uploads',
+    
+    // hash method: md5 | sha1 | null
+    hash: null
   });
 
+  if(options.hash) {
+    var DigestStream = require('digest-stream');
+  }
 
   var receiver__ = WritableStream({ objectMode: true });
 
@@ -118,13 +124,25 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         done(err);
       });
 
-      var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, adapter);
+      if(options.hash) {
+        var __hash__ = DigestStream(options.hash, 'hex', function(hash, length) {
+          __newFile.extra = __newFile.extra || {};
+          __newFile.extra[options.hash] = hash;
+        });
+      }
+      else {
+        __hash__ = null;
+      }
+
+      var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, __hash__, adapter);
 
       // Finally pipe the progress THROUGH the progress stream
       // and out to disk.
-      __newFile
-        .pipe(__progress__)
-        .pipe(outs__);
+      var fileStream = __newFile.pipe(__progress__);
+
+      if(__hash__) fileStream.pipe(__hash__);
+
+      fileStream.pipe(outs__);
 
     });
 

@@ -15,7 +15,7 @@ var TransformStream = require('stream').Transform;
  * @param  {[type]} outs__     [description]
  * @return {[type]}            [description]
  */
-module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, adapter) {
+module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, __hash__, adapter) {
   options = options || {};
   var log = options.log || function noOpLog(){};
 
@@ -116,6 +116,8 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       err.maxBytes = options.maxBytes;
       err.written = totalBytesWritten;
       err.message = 'Upload limit of ' + err.maxBytes + ' bytes exceeded (' + err.written + ' bytes written)';
+
+      if(__hash__) __hash__._writableState = false;
 
       // Stop listening for progress events
       __progress__.removeAllListeners('progress');
