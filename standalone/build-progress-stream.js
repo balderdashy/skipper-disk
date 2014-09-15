@@ -15,7 +15,7 @@ var TransformStream = require('stream').Transform;
  * @param  {[type]} outs__     [description]
  * @return {[type]}            [description]
  */
-module.exports = function buildProgressStream (options, __newFile, receiver__, outs__) {
+module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, adapter) {
   options = options || {};
   var log = options.log || function noOpLog(){};
 
@@ -41,7 +41,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
     // progress and determine whether we're within quota
     this.emit('progress', {
       id: localID,
-      fd: __newFile._skipperFD,
+      fd: __newFile.fd,
       name: __newFile.name,
       written: writtenSoFar,
       total: guessedTotal,
@@ -81,7 +81,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
     } else {
       currentFileProgress = {
         id: localID,
-        fd: __newFile._skipperFD,
+        fd: __newFile.fd,
         name: __newFile.filename,
         written: milestone.written,
         total: milestone.total,
@@ -96,7 +96,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
     // Recalculate `totalBytesWritten` so far for this receiver instance
     // (across ALL OF ITS FILES)
     // using the sum of all bytes written to each file in `receiver__._files`
-    totalBytesWritten = _.reduce(receiver__._files, function(memo, status) {
+    var totalBytesWritten = _.reduce(receiver__._files, function(memo, status) {
       memo += status.written;
       return memo;
     }, 0);
@@ -125,8 +125,8 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       (function gc(err) {
       // Garbage-collects the bytes that were already written for this file.
       // (called when a read or write error occurs)
-        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + __newFile._skipperFD + '...');
-        adapter.rm(fd, function(gcErr) {
+        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + __newFile.fd + '...');
+        adapter.rm(__newFile.fd, function(gcErr) {
           if (gcErr) return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',[err].concat([gcErr]));
           return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',err);
         });
