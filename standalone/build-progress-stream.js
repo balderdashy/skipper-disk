@@ -15,7 +15,7 @@ var TransformStream = require('stream').Transform;
  * @param  {[type]} outs__     [description]
  * @return {[type]}            [description]
  */
-module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, adapter) {
+module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, __hash__, adapter) {
   options = options || {};
   var log = options.log || function noOpLog(){};
 
