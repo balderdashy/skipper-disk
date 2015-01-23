@@ -7,7 +7,8 @@ var path = require('path');
 var _ = require('lodash');
 var fsx = require('fs-extra');
 var r_buildProgressStream = require('./build-progress-stream');
-
+var debug = require('debug')('skipper-disk');
+var util = require('util');
 
 
 /**
@@ -82,9 +83,8 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
   // into this receiver.  (filename === `__newFile.filename`).
   receiver__._write = function onFile(__newFile, encoding, done) {
 
-    // Determine the file descriptor-- the unique identifier.
+    // `__newFile.fd` is the file descriptor-- the unique identifier.
     // Often represents the location where file should be written.
-    __newFile.fd;
 
     // If fd DOESNT have leading slash, resolve the path
     // from process.cwd()
@@ -102,7 +102,9 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
       }
 
       // Error reading from the file stream
+      debug('binding error handler for incoming file in skipper-disk');
       __newFile.on('error', function(err) {
+        debug('Read error on file '+__newFile.filename+ '::'+ util.inspect(err&&err.stack));
         log('***** READ error on file ' + __newFile.filename, '::', err);
       });
 
