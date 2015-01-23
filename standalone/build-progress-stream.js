@@ -15,8 +15,9 @@ var TransformStream = require('stream').Transform;
  * @param  {[type]} outs__     [description]
  * @return {[type]}            [description]
  */
-module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, __hash__, adapter) {
+module.exports = function buildProgressStream (options, __newFile, receiver__, outs__, __hash__) {
   options = options || {};
+  var adapter = options.adapter;
   var log = options.log || function noOpLog(){};
 
   // Generate a progress stream and unique id for this file
