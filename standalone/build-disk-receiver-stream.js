@@ -20,7 +20,7 @@ var r_buildProgressStream = require('./build-progress-stream');
  * @param  {Object} options
  * @return {Stream.Writable}
  */
-module.exports = function buildDiskReceiverStream(options, adapter) {
+module.exports = function buildDiskReceiverStream(options) {
   options = options || {};
   var log = options.log || function noOpLog(){};
 
@@ -134,7 +134,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         var __hash__ = null;
       }
 
-      var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, __hash__, adapter);
+      var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, __hash__);
 
       // Finally pipe the progress THROUGH the progress stream
       // and out to disk.
