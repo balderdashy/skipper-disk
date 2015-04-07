@@ -52,8 +52,8 @@ module.exports = function DiskStore(options) {
     }
   };
 
-  adapter.receive = function(options) {
-    return r_buildDiskReceiverStream(options, adapter);
+  adapter.receive = function(opts) {
+    return r_buildDiskReceiverStream(_.defaults(opts, options), adapter);
   };
 
   return adapter;
