@@ -3,7 +3,7 @@
 [![NPM version](https://badge.fury.io/js/skipper-disk.png)](http://badge.fury.io/js/skipper-disk) &nbsp; &nbsp;
 [![Build Status](https://travis-ci.org/balderdashy/skipper-disk.svg?branch=master)](https://travis-ci.org/balderdashy/skipper-disk)
 
-Local filesystem adapter for receiving [upstreams](https://github.com/balderdashy/skipper#what-are-upstreams). Particularly useful for streaming multipart file uploads from the [Skipper](github.com/balderdashy/skipper) body parser.
+Local filesystem adapter for receiving [upstreams](https://github.com/balderdashy/skipper#what-are-upstreams). Particularly useful for streaming multipart file uploads from the [Skipper](https://github.com/balderdashy/skipper) body parser.
 
 
 ## Installation
@@ -35,7 +35,7 @@ req.file('avatar')
 });
 ```
 
-For more detailed usage information and a full list of available options, see the Skipper repo, especially the section on "[https://github.com/balderdashy/skipper#uploading-files-to-disk](Uploading to Local Disk)".
+For more detailed usage information and a full list of available options, see the Skipper repo, especially the ["options section"](https://github.com/balderdashy/skipper#options).
 
 
 ## Contribute
