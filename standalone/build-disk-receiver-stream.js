@@ -114,6 +114,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
       // When the file is done writing, call the callback
       outs__.on('finish', function successfullyWroteFile() {
         log('finished file: ' + __newFile.filename);
+        receiver__.emit('writefile', __newFile);
         done();
       });
       outs__.on('E_EXCEEDS_UPLOAD_LIMIT', function (err) {
