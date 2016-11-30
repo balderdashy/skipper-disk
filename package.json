@@ -33,7 +33,6 @@
   "dependencies": {
     "debug": "2.2.0",
     "fs-extra": "0.30.0",
-    "lodash": "3.10.1",
-    "node-uuid": "1.4.7"
+    "lodash": "3.10.1"
   }
 }
