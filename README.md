@@ -66,6 +66,3 @@ This module is part of the [Sails framework](http://sailsjs.com/), and is free a
 
 
 ![image_squidhome@2x.png](http://i.imgur.com/RIvu9.png)
-
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/a22d3919de208c90c898986619efaa85 "githalytics.com")](http://githalytics.com/balderdashy/sails.io.js)
