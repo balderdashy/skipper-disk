@@ -3,7 +3,7 @@
 [![NPM version](https://badge.fury.io/js/skipper-disk.png)](http://badge.fury.io/js/skipper-disk) &nbsp; &nbsp;
 [![Build Status](https://travis-ci.org/balderdashy/skipper-disk.svg?branch=master)](https://travis-ci.org/balderdashy/skipper-disk)
 
-Local filesystem adapter for receiving [upstreams](https://github.com/balderdashy/skipper#what-are-upstreams). Particularly useful for streaming multipart file uploads from the [Skipper](github.com/balderdashy/skipper) body parser.
+Local filesystem adapter for receiving [upstreams](https://github.com/balderdashy/skipper#what-are-upstreams). Particularly useful for streaming multipart file uploads from the [Skipper](https://github.com/balderdashy/skipper) body parser.
 
 
 ## Installation
@@ -12,7 +12,7 @@ Local filesystem adapter for receiving [upstreams](https://github.com/balderdash
 $ npm install skipper-disk --save
 ```
 
-If you're using this module with Express, Connect, Kraken, or a vanilla Node.js server, make sure you have skipper itself [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).  This is the default configuration in [Sails](https://github.com/balderdashy/sails) as of v0.10.
+If you're using this module with Express, Connect, Kraken, or a vanilla Node.js server, make sure you have skipper itself [installed as your body parser](http://sailsjs.com/documentation/concepts/middleware).  This is the default configuration in [Sails](https://github.com/balderdashy/sails) as of v0.10.
 
 
 
@@ -58,11 +58,11 @@ $ npm test
 **[MIT](./LICENSE)**
 &copy; 2013, 2014-
 
-[Mike McNeil](http://michaelmcneil.com), [Balderdash](http://balderdash.co) & contributors
+[Mike McNeil](http://mikermcneil.com/), [Balderdash](http://sailsjs.com/flagship) & contributors
 
 See `LICENSE.md`.
 
-This module is part of the [Sails framework](http://sailsjs.org), and is free and open-source under the [MIT License](http://sails.mit-license.org/).
+This module is part of the [Sails framework](http://sailsjs.com/), and is free and open-source under the [MIT License](https://sails.mit-license.org/).
 
 
 ![image_squidhome@2x.png](http://i.imgur.com/RIvu9.png)
