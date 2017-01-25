@@ -124,7 +124,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         // If we couldn't find the file in the receiver, that's super weird, but output
         // a notice and try to continue anyway.
         else {
-          debug('Warning: received `finish` event for file `' + __newFile.fd + '`, but could not find a record of that file in the receiver.');
+          debug('Warning: received `finish` event for file `' + __newFile.filename + '` uploaded via field `' + __newFile.field + '`, but could not find a record of that file in the receiver.');
           debug('Was this a zero-byte file?');
           debug('Attempting to return the file anyway...');
         }
