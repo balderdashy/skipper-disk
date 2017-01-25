@@ -116,9 +116,18 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         log('finished file: ' + __newFile.filename);
         // File the file entry in the receiver with the same fd as the finished stream.
         var file = _.find(receiver__._files, {fd: __newFile.fd});
-        // Set the byteCount of the stream to the "total" value of the file, which has
-        // been updated as the file was written.
-        __newFile.byteCount = file.total;
+        if (file) {
+          // Set the byteCount of the stream to the "total" value of the file, which has
+          // been updated as the file was written.
+          __newFile.byteCount = file.total;
+        }
+        // If we couldn't find the file in the receiver, that's super weird, but output
+        // a notice and try to continue anyway.
+        else {
+          debug('Warning: received `finish` event for file `' + __newFile.fd + '`, but could not find a record of that file in the receiver.');
+          debug('Was this a zero-byte file?');
+          debug('Attempting to return the file anyway...');
+        }
         // Indicate that a file was persisted.
         receiver__.emit('writefile', __newFile);
         done();
