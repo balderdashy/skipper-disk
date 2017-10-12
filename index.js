@@ -3,9 +3,9 @@
  */
 
 var path = require('path');
-var _ = require('lodash');
+var _ = require('@sailshq/lodash');
 var fsx = require('fs-extra');
-var r_buildDiskReceiverStream = require('./standalone/build-disk-receiver-stream');
+var buildDiskReceiverStream = require('./standalone/build-disk-receiver-stream');
 
 
 
@@ -17,10 +17,8 @@ var r_buildDiskReceiverStream = require('./standalone/build-disk-receiver-stream
  * @return {Object}
  */
 
-module.exports = function DiskStore(options) {
+module.exports = function SkipperDisk(options) {
   options = options || {};
-
-  var log = options.log || function _noOpLog() {};
 
   var adapter = {};
   adapter.rm = function(fd, cb) {
@@ -28,19 +26,25 @@ module.exports = function DiskStore(options) {
       // Ignore "doesn't exist" errors
       if (err && (typeof err !== 'object' || err.code !== 'ENOENT')) {
         return cb(err);
-      } else return cb();
+      }
+      else {
+        return cb();
+      }
     });
   };
 
   adapter.ls = function(dirpath, cb) {
     return fsx.readdir(dirpath, function (err, files){
-      if (err) return cb(err);
+      if (err) { return cb(err); }
+
       files = _.reduce(_.isArray(files)?files:[], function (m, filename){
         var fd = path.join(dirpath,filename);
         m.push(fd);
         return m;
       }, []);
-      cb(null, files);
+
+      cb(undefined, files);
+
     });
   };
 
@@ -53,7 +57,7 @@ module.exports = function DiskStore(options) {
   };
 
   adapter.receive = function(opts) {
-    return r_buildDiskReceiverStream(_.defaults(opts, options), adapter);
+    return buildDiskReceiverStream(_.defaults(opts, options), adapter);
   };
 
   return adapter;

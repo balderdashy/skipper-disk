@@ -2,7 +2,7 @@
  * Module dependencies
  */
 
-var _ = require('lodash');
+var _ = require('@sailshq/lodash');
 var TransformStream = require('stream').Transform;
 
 
@@ -129,7 +129,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       // (called when a read or write error occurs)
         log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + __newFile.fd + '...');
         adapter.rm(__newFile.fd, function(gcErr) {
-          if (gcErr) return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',[err].concat([gcErr]));
+          if (gcErr) { return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',[err].concat([gcErr])); }
           return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',err);
         });
       })(err);

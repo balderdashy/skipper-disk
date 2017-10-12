@@ -12,7 +12,9 @@ Local filesystem adapter for receiving [upstreams](https://github.com/balderdash
 $ npm install skipper-disk --save
 ```
 
-If you're using this module with Express, Connect, Kraken, or a vanilla Node.js server, make sure you have skipper itself [installed as your body parser](http://beta.sailsjs.org/#/documentation/concepts/Middleware?q=adding-or-overriding-http-middleware).  This is the default configuration in [Sails](https://github.com/balderdashy/sails) as of v0.10.
+This module is part of the default configuration in [Sails](https://sailsjs.com).
+
+> If you're using this module outside of Sails (e.g. Express or a vanilla Node.js server), make sure you have skipper itself [installed as your body parser](https://sailsjs.com/documentation/concepts/middleware?q=adding-or-overriding-http-middleware).
 
 
 
@@ -40,9 +42,7 @@ For more detailed usage information and a full list of available options, see th
 
 ## Contribute
 
-See [ROADMAP.md](https://github.com/balderdashy/skipper-s3/blob/master/ROADMAP.md).
-
-Also be sure to check out [ROADMAP.md in the Skipper repo](https://github.com/balderdashy/skipper/blob/master/ROADMAP.md).
+Check out the [contribution guide](https://sailsjs.com/contributing) and [roadmap](https://trello.com/b/s9zEnyG7).
 
 To run the tests:
 
@@ -56,16 +56,13 @@ $ npm test
 ## License
 
 **[MIT](./LICENSE)**
-&copy; 2013, 2014-
 
-[Mike McNeil](http://michaelmcneil.com), [Balderdash](http://balderdash.co) & contributors
+[Mike McNeil](https://sailsjs.com/studio), [Balderdash Design Co.](http://balderdash.co), [Sails Co.](https://sailsjs.com/about)
 
 See `LICENSE.md`.
 
-This module is part of the [Sails framework](http://sailsjs.org), and is free and open-source under the [MIT License](http://sails.mit-license.org/).
+This module is part of the [Sails framework](https://sailsjs.com), and is free and open-source under the [MIT License](https://sailsjs.com/license).
 
 
 ![image_squidhome@2x.png](http://i.imgur.com/RIvu9.png)
 
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/a22d3919de208c90c898986619efaa85 "githalytics.com")](http://githalytics.com/balderdashy/sails.io.js)

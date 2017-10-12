@@ -4,9 +4,9 @@
 
 var WritableStream = require('stream').Writable;
 var path = require('path');
-var _ = require('lodash');
+var _ = require('@sailshq/lodash');
 var fsx = require('fs-extra');
-var r_buildProgressStream = require('./build-progress-stream');
+var buildProgressStream = require('./build-progress-stream');
 var debug = require('debug')('skipper-disk');
 var util = require('util');
 
@@ -29,7 +29,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
   // convert it into bytes
   if (options.maxBytes) {
     var _maxBytesRegResult = (options.maxBytes + '').match(/(\d+)m/i);
-    if (_maxBytesRegResult != null){
+    if (!_.isNull(_maxBytesRegResult)){
       options.maxBytes = _maxBytesRegResult[1] * 1024 * 1024;
     }
   };
@@ -72,10 +72,6 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
   // Track the progress of all file uploads that pass through this receiver
   // through one or more attached Upstream(s).
   receiver__._files = [];
-
-  // Keep track of the number total bytes written so that maxBytes can
-  // be enforced.
-  var totalBytesWritten = 0;
 
 
   // This `_write` method is invoked each time a new file is received
@@ -136,7 +132,7 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         done(err);
       });
 
-      var __progress__ = r_buildProgressStream(options, __newFile, receiver__, outs__, adapter);
+      var __progress__ = buildProgressStream(options, __newFile, receiver__, outs__, adapter);
 
       // Finally pipe the progress THROUGH the progress stream
       // and out to disk.
