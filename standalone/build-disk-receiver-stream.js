@@ -132,7 +132,23 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
         done(err);
       });
 
+      // Create another stream that simply keeps track of the progress of the file stream and emits `progress` events
+      // on the receiver.
       var __progress__ = buildProgressStream(options, __newFile, receiver__, outs__, adapter);
+
+      // Forward any uncaught errors to the receiver.
+      //
+      // Note -- it's important to forward using `.emit` rather than calling `done()`, because if for some reason an error occurs
+      // _after_ the receiver stream closes, calling the `done()` method will throw another error.
+      // Skipper core handles errors on the receiver and can deal with those errors even after the receiver stream has closed.
+      outs__.on('error', function(err) {
+        var newError = new Error('Error writing file `' + __newFile.fd + '` to disk (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
+        receiver__.emit('error', newError);
+      });
+      __progress__.on('error', function(err) {
+        var newError = new Error('Error reported from the progress stream while uploading file `' + __newFile.fd + '` (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
+        receiver__.emit('error', newError);
+      });
 
       // Finally pipe the progress THROUGH the progress stream
       // and out to disk.
