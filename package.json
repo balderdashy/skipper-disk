@@ -30,9 +30,9 @@
   },
   "homepage": "https://sailsjs.com/support",
   "dependencies": {
-    "debug": "2.2.0",
-    "fs-extra": "0.30.0",
-    "@sailshq/lodash": "^3.10.2"
+    "@sailshq/lodash": "^3.10.2",
+    "debug": "3.1.0",
+    "fs-extra": "0.30.0"
   },
   "devDependencies": {
     "eslint": "3.19.0",
