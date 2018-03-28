@@ -1,6 +1,6 @@
 {
   "name": "skipper-disk",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "Receive streaming file uploads on your local filesystem.",
   "main": "index.js",
   "scripts": {
