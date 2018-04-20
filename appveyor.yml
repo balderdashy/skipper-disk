@@ -22,8 +22,10 @@ install:
   # Get the latest stable version of Node.js
   # (Not sure what this is for, it's just in Appveyor's example.)
   - ps: Install-Product node $env:nodejs_version
+  # Upgrade npm
+  - npm i -g npm@latest
   # Install declared dependencies
-  - npm install
+  - npm ci
 
 
 # Post-install test scripts.
