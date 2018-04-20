@@ -17,6 +17,12 @@ node_js:
   - "8"
   - "node"
 
+before_install:
+  - npm i -g npm@latest
+
+install:
+  - npm ci
+
 branches:
   only:
     - master
