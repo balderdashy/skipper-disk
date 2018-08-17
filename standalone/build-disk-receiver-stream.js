@@ -86,11 +86,15 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
     // to Readable streams that come from the filesystem.  So this kinda messed
     // us up.  And we had to do this instead:
     var skipperFd = __newFile.skipperFd || (_.isString(__newFile.fd)? __newFile.fd : undefined);
+    if (!_.isString(skipperFd)) {
+      return done(new Error('In skipper-disk adapter, write() method called with a stream that has an invalid `skipperFd`: '+skipperFd));
+    }
 
     // If fd DOESNT have leading slash, resolve the path
     // from process.cwd()
     if (!skipperFd.match(/^\//)) {
-      __newFile.skipperFd = path.resolve(process.cwd(), '.tmp/uploads', skipperFd);
+      skipperFd = path.resolve(process.cwd(), '.tmp/uploads', skipperFd);
+      __newFile.skipperFd = skipperFd;
     }
 
     // Ensure necessary parent directories exist:
