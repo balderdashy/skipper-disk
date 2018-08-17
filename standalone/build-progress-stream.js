@@ -42,6 +42,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
     this.emit('progress', {
       id: localID,
       fd: __newFile.fd,
+      skipperFd: (__newFile.skipperFd || (_.isString(__newFile.fd) ? __newFile.fd : undefined)),
       name: __newFile.name,
       written: writtenSoFar,
       total: guessedTotal,
@@ -82,6 +83,7 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       currentFileProgress = {
         id: localID,
         fd: __newFile.fd,
+        skipperFd: (__newFile.skipperFd || (_.isString(__newFile.fd) ? __newFile.fd : undefined)),
         name: __newFile.filename,
         written: milestone.written,
         total: milestone.total,
@@ -127,8 +129,8 @@ module.exports = function buildProgressStream (options, __newFile, receiver__, o
       (function gc(err) {
       // Garbage-collects the bytes that were already written for this file.
       // (called when a read or write error occurs)
-        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + __newFile.fd + '...');
-        adapter.rm(__newFile.fd, function(gcErr) {
+        log('************** Garbage collecting file `' + __newFile.filename + '` located @ ' + (__newFile.skipperFd || (_.isString(__newFile.fd) ? __newFile.fd : undefined)) + '...');
+        adapter.rm((__newFile.skipperFd || (_.isString(__newFile.fd) ? __newFile.fd : undefined)), function(gcErr) {
           if (gcErr) { return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',[err].concat([gcErr])); }
           return outs__.emit('E_EXCEEDS_UPLOAD_LIMIT',err);
         });

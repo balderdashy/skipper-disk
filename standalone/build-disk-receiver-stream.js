@@ -79,17 +79,22 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
   // into this receiver.  (filename === `__newFile.filename`).
   receiver__._write = function onFile(__newFile, encoding, done) {
 
-    // `__newFile.fd` is the file descriptor-- the unique identifier.
+    // `skipperFd` is the file descriptor-- the unique identifier.
     // Often represents the location where file should be written.
+    //
+    // But note that we formerly used `fd`, but now Node attaches an `fd` property
+    // to Readable streams that come from the filesystem.  So this kinda messed
+    // us up.  And we had to do this instead:
+    var skipperFd = __newFile.skipperFd || (_.isString(__newFile.fd)? __newFile.fd : undefined);
 
     // If fd DOESNT have leading slash, resolve the path
     // from process.cwd()
-    if (!__newFile.fd.match(/^\//)) {
-      __newFile.fd = path.resolve(process.cwd(), '.tmp/uploads', __newFile.fd);
+    if (!skipperFd.match(/^\//)) {
+      __newFile.skipperFd = path.resolve(process.cwd(), '.tmp/uploads', skipperFd);
     }
 
     // Ensure necessary parent directories exist:
-    fsx.mkdirs(path.dirname(__newFile.fd), function(mkdirsErr) {
+    fsx.mkdirs(path.dirname(skipperFd), function(mkdirsErr) {
       // If we get an error here, it's probably because the Node
       // user doesn't have write permissions at the designated
       // path.
@@ -105,13 +110,13 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
       });
 
       // Create a new write stream to write to disk
-      var outs__ = fsx.createWriteStream(__newFile.fd, encoding);
+      var outs__ = fsx.createWriteStream(skipperFd, encoding);
 
       // When the file is done writing, call the callback
       outs__.on('finish', function successfullyWroteFile() {
         log('finished file: ' + __newFile.filename);
         // File the file entry in the receiver with the same fd as the finished stream.
-        var file = _.find(receiver__._files, {fd: __newFile.fd});
+        var file = _.find(receiver__._files, {fd: skipperFd});
         if (file) {
           // Set the byteCount of the stream to the "total" value of the file, which has
           // been updated as the file was written.
@@ -142,11 +147,11 @@ module.exports = function buildDiskReceiverStream(options, adapter) {
       // _after_ the receiver stream closes, calling the `done()` method will throw another error.
       // Skipper core handles errors on the receiver and can deal with those errors even after the receiver stream has closed.
       outs__.on('error', function(err) {
-        var newError = new Error('Error writing file `' + __newFile.fd + '` to disk (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
+        var newError = new Error('Error writing file `' + skipperFd + '` to disk (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
         receiver__.emit('error', newError);
       });
       __progress__.on('error', function(err) {
-        var newError = new Error('Error reported from the progress stream while uploading file `' + __newFile.fd + '` (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
+        var newError = new Error('Error reported from the progress stream while uploading file `' + skipperFd + '` (for field `'+__newFile.field+'`): ' + util.inspect(err, {depth: 5}));
         receiver__.emit('error', newError);
       });
 
