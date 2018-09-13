@@ -37,7 +37,7 @@ req.file('avatar')
 });
 ```
 
-For more detailed usage information and a full list of available options, see the Skipper repo, especially the section on "[https://github.com/balderdashy/skipper#uploading-files-to-disk](Uploading to Local Disk)".
+For more detailed usage information and a full list of available options, see the Skipper repo, especially the section on "[Uploading to Local Disk](https://github.com/balderdashy/skipper#uploading-files-to-disk)".
 
 
 ## Contribute
